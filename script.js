@@ -2383,3 +2383,179 @@ function updateExportButtons() {
             : "No converted output";
     }
 }
+/* =========================================
+   ZIP EXPORT
+========================================= */
+
+async function exportZip() {
+    if (state.busy) {
+        return;
+    }
+
+    if (state.results.length === 0) {
+        showToast("No converted files available.", "warning");
+        return;
+    }
+
+    if (typeof JSZip === "undefined") {
+        showToast(
+            "ZIP library is unavailable. Check your internet connection.",
+            "error"
+        );
+        return;
+    }
+
+    const zip = new JSZip();
+
+    const usedNames = new Set();
+
+    for (const result of state.results) {
+        let filename =
+            `${sanitizeFilename(getBaseName(result.name))}.svg`;
+
+        let counter = 1;
+
+        while (usedNames.has(filename.toLowerCase())) {
+            filename =
+                `${sanitizeFilename(getBaseName(result.name))}_${counter}.svg`;
+
+            counter++;
+        }
+
+        usedNames.add(filename.toLowerCase());
+
+        zip.file(filename, result.svg);
+    }
+
+    try {
+        if (DOM.zipBtn) {
+            DOM.zipBtn.disabled = true;
+            DOM.zipBtn.textContent = "Creating ZIP...";
+        }
+
+        updateProgress(0, "Preparing ZIP archive...");
+
+        const blob = await zip.generateAsync(
+            {
+                type: "blob",
+                compression: "DEFLATE",
+                compressionOptions: {
+                    level: 6
+                }
+            },
+            metadata => {
+                updateProgress(
+                    metadata.percent,
+                    `Creating ZIP archive: ${Math.round(metadata.percent)}%`
+                );
+            }
+        );
+
+        downloadBlob(blob, "VECTOR-FORGE-EXPORT.zip");
+
+        updateProgress(100, "ZIP export completed.");
+
+        showToast(
+            `${state.results.length} SVG file(s) exported.`,
+            "success"
+        );
+
+    } catch (error) {
+        console.error("ZIP export failed:", error);
+
+        showToast(
+            `ZIP export failed: ${error.message}`,
+            "error"
+        );
+
+    } finally {
+        if (DOM.zipBtn) {
+            DOM.zipBtn.textContent = "Export ZIP";
+        }
+
+        updateExportButtons();
+    }
+}
+
+/* =========================================
+   TOAST NOTIFICATIONS
+========================================= */
+
+function showToast(message, type = "success", duration = 3200) {
+    if (!DOM.toastRegion) {
+        console.log(`[${type}] ${message}`);
+        return;
+    }
+
+    const toast = document.createElement("div");
+
+    toast.className = `toast ${type}`;
+    toast.setAttribute("role", "status");
+    toast.textContent = String(message);
+
+    DOM.toastRegion.appendChild(toast);
+
+    const removeToast = () => {
+        if (!toast.isConnected) {
+            return;
+        }
+
+        toast.classList.add("removing");
+
+        setTimeout(() => {
+            toast.remove();
+        }, 220);
+    };
+
+    setTimeout(removeToast, duration);
+}
+
+/* =========================================
+   ERROR HANDLING
+========================================= */
+
+function handleApplicationError(error, context = "Application") {
+    console.error(`${context}:`, error);
+
+    const message = error instanceof Error
+        ? error.message
+        : String(error);
+
+    showToast(
+        `${context}: ${message}`,
+        "error",
+        5000
+    );
+}
+
+/* =========================================
+   GLOBAL ERROR LISTENERS
+========================================= */
+
+function installErrorHandlers() {
+    window.addEventListener("error", event => {
+        handleApplicationError(
+            event.error || event.message,
+            "Unexpected error"
+        );
+    });
+
+    window.addEventListener("unhandledrejection", event => {
+        handleApplicationError(
+            event.reason,
+            "Unhandled asynchronous error"
+        );
+    });
+}
+
+/* =========================================
+   EXPORT SHORTCUTS
+========================================= */
+
+function quickSaveActiveResult() {
+    saveSvgResult(state.activeId);
+}
+
+function saveAllResultsAsZip() {
+    exportZip();
+               }
