@@ -1,304 +1,1063 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PNG/WebP → SVG 確実変換ツール</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f4f6f9;
-      color: #333;
-      display: flex;
-      justify-content: center;
-      padding: 30px 15px;
-    }
-    .container {
-      background: #ffffff;
-      width: 100%;
-      max-width: 900px;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-    h1 { font-size: 1.5rem; margin-bottom: 20px; text-align: center; color: #2c3e50; }
-    .file-input-area {
-      border: 2px dashed #3498db;
-      padding: 30px;
-      text-align: center;
-      border-radius: 8px;
-      background: #f8fbfe;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-    .file-input-area:hover { background: #ebf5fb; }
-    input[type="file"] { display: none; }
-    
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      background: #fafafa;
-      padding: 10px;
-      border: 1px solid #eee;
-      border-radius: 6px;
-    }
-    label { font-size: 0.85rem; font-weight: bold; color: #555; }
-    select, input[type="range"] { padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
-    
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-    }
-    .btn:hover { background-color: #2980b9; }
-    .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-    .btn-green { background-color: #2ecc71; }
-    .btn-green:hover { background-color: #27ae60; }
-    .btn-secondary { background-color: #7f8c8d; }
-    .btn-secondary:hover { background-color: #95a5a6; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101116">
+<title>VECTOR FORGE</title>
 
-    .preview-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 25px;
-    }
-    @media (max-width: 650px) { .preview-section { grid-template-columns: 1fr; } }
-    .preview-box {
-      border: 1px solid #eee;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: center;
-      background: #fafafa;
-    }
-    .preview-box h3 { font-size: 0.9rem; margin-bottom: 10px; color: #666; }
-    .preview-box img { max-width: 100%; max-height: 250px; height: auto; object-fit: contain; }
-    
-    .svg-wrapper {
-      max-width: 100%;
-      height: 250px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #ddd;
-      background-image: linear-gradient(45deg, #eee 25%, transparent 25%), 
-                        linear-gradient(-45deg, #eee 25%, transparent 25%), 
-                        linear-gradient(45deg, transparent 75%, #eee 75%), 
-                        linear-gradient(-45deg, transparent 75%, #eee 75%);
-      background-size: 16px 16px;
-      background-color: #fff;
-    }
-    .svg-wrapper svg { max-width: 100%; max-height: 100%; height: auto; }
+<style>
+:root {
+  --bg: #101116;
+  --panel: #191b23;
+  --panel2: #20232d;
+  --border: #303440;
+  --text: #f2f3f7;
+  --muted: #9299a8;
+  --accent: #8b7cff;
+  --cyan: #45d9c1;
+  --danger: #ff657b;
+}
 
-    .code-section { margin-top: 25px; }
-    textarea {
-      width: 100%;
-      height: 120px;
-      font-family: monospace;
-      font-size: 0.8rem;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: #272822;
-      color: #f8f8f2;
-      resize: vertical;
-    }
-    .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
-    .action-buttons button { flex: 1; }
-  </style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  height: 64px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: #14151c;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 35px;
+  height: 35px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #8c7aff, #4bd9c3);
+  color: #101116;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.brand-name {
+  font-weight: 800;
+  letter-spacing: 1.3px;
+}
+
+.brand-sub {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  margin-top: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #4bd9a8;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+main {
+  width: min(1500px, 100%);
+  margin: auto;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 20px;
+  flex: 1;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  overflow: hidden;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-heading {
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 750;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-body {
+  padding: 16px;
+}
+
+.value {
+  color: var(--cyan);
+  font-size: 11px;
+}
+
+.dropzone {
+  min-height: 150px;
+  border: 1px dashed #626a80;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  background: #1c1e28;
+  transition: .2s;
+  cursor: pointer;
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+  border-color: var(--accent);
+  background: #28243d;
+}
+
+.drop-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.drop-title {
+  font-weight: 750;
+}
+
+.drop-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 7px;
+  line-height: 1.7;
+}
+
+.file-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.file-item {
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  background: #1b1d26;
+}
+
+.file-item.active {
+  border-color: var(--accent);
+  background: #242238;
+}
+
+.file-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 5px;
+  background: #292c37;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-meta {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.icon-btn:hover {
+  background: #343744;
+  color: white;
+}
+
+.control {
+  margin-bottom: 17px;
+}
+
+.control-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.control label {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  background: #11131a;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  outline: none;
+}
+
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 13px 0;
+}
+
+.toggle-row span {
+  font-size: 12px;
+}
+
+.toggle {
+  appearance: none;
+  width: 35px;
+  height: 19px;
+  background: #454957;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 13px;
+  height: 13px;
+  background: white;
+  border-radius: 50%;
+  transition: .2s;
+}
+
+.toggle:checked {
+  background: var(--accent);
+}
+
+.toggle:checked::before {
+  left: 19px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: #292c37;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: .15s;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(1.2);
+}
+
+.btn.primary {
+  background: linear-gradient(110deg, #8979ff, #6d61e8);
+  border-color: transparent;
+  color: white;
+}
+
+.btn.secondary {
+  background: #202e32;
+  border-color: #31514f;
+  color: #72e4cf;
+}
+
+.btn.full {
+  width: 100%;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-row > * {
+  flex: 1;
+}
+
+.workspace {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 9px 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tab.active {
+  background: #28243e;
+  color: #c0b7ff;
+  border-color: #6558a6;
+}
+
+.preview-panel {
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-head {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-stage {
+  flex: 1;
+  min-height: 370px;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  background-color: #171922;
+  background-image:
+    linear-gradient(45deg, #20232c 25%, transparent 25%),
+    linear-gradient(-45deg, #20232c 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #20232c 75%),
+    linear-gradient(-45deg, transparent 75%, #20232c 75%);
+  background-size: 22px 22px;
+  background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+}
+
+.preview-stage img,
+.preview-stage svg {
+  max-width: 100%;
+  max-height: 540px;
+  object-fit: contain;
+}
+
+.preview-stage .empty {
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.empty-icon {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.preview-footer {
+  padding: 10px 15px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.progress-wrap {
+  height: 4px;
+  background: #292c36;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  transition: width .15s;
+}
+
+.result-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.result-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.result-tabs button.active {
+  background: #303044;
+  color: white;
+}
+
+.code-area {
+  width: 100%;
+  height: 240px;
+  resize: vertical;
+  border: 0;
+  outline: none;
+  padding: 14px;
+  background: #11131a;
+  color: #b9d6ca;
+  font: 11px/1.6 Consolas, monospace;
+}
+
+.result-empty {
+  padding: 25px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toast {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  max-width: calc(100vw - 44px);
+  background: #292d39;
+  border: 1px solid #4b5263;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 9px;
+  box-shadow: 0 10px 30px #0008;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: .2s;
+  z-index: 100;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 14px 22px;
+  color: var(--muted);
+  font-size: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media(max-width:900px) {
+  main {
+    grid-template-columns: 1fr;
+    padding: 13px;
+  }
+}
+
+@media(max-width:600px) {
+  header {
+    padding: 0 13px;
+    height: 58px;
+  }
+
+  .status {
+    display: none;
+  }
+
+  main {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .preview-panel {
+    min-height: 340px;
+  }
+
+  .preview-stage {
+    min-height: 280px;
+    padding: 10px;
+  }
+
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .toolbar .btn-row,
+  .toolbar .tabs {
+    width: 100%;
+  }
+
+  .toolbar .tab {
+    flex: 1;
+  }
+
+  footer {
+    padding: 12px;
+  }
+}
+</style>
 </head>
+
 <body>
+<div class="app">
 
-  <div class="container">
-    <h1>PNG / WebP → SVG 確実変換ツール</h1>
-
-    <div class="file-input-area" onclick="document.getElementById('fileInput').click()">
-      <p id="fileLabel">クリックして画像を選択 (PNG, WebP, JPG)</p>
-      <input type="file" id="fileInput" accept="image/png, image/webp, image/jpeg">
-    </div>
-
-    <div class="controls">
-      <div class="control-group">
-        <label for="mode">変換モード</label>
-        <select id="mode">
-          <option value="pixel">ピクセルベクター (完全忠実・高速)</option>
-          <option value="embed">SVG埋め込み (超軽量化・劣化なし)</option>
-        </select>
-      </div>
-
-      <div class="control-group">
-        <label for="maxDimension">最大サイズ: <span id="dimVal">300</span>px</label>
-        <input type="range" id="maxDimension" min="50" max="800" step="50" value="300">
-      </div>
-    </div>
-
-    <button id="convertBtn" class="btn" disabled>SVGへ変換する</button>
-
-    <div class="preview-section" id="previewSection" style="display: none;">
-      <div class="preview-box">
-        <h3>元画像</h3>
-        <img id="originalPreview" alt="Original Image">
-      </div>
-      <div class="preview-box">
-        <h3>変換後の SVG プレビュー</h3>
-        <div class="svg-wrapper">
-          <div id="svgContainer"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="code-section" id="codeSection" style="display: none;">
-      <label for="svgCode" style="font-size:0.85rem; font-weight:bold; color:#555;">SVG ソースコード:</label>
-      <textarea id="svgCode" readonly></textarea>
-      <div class="action-buttons">
-        <button id="copyBtn" class="btn btn-secondary">コードをコピー</button>
-        <button id="downloadBtn" class="btn btn-green">SVGをダウンロード</button>
-      </div>
+<header>
+  <div class="brand">
+    <div class="logo">V</div>
+    <div>
+      <div class="brand-name">VECTOR FORGE</div>
+      <div class="brand-sub">IMAGE TO SVG STUDIO</div>
     </div>
   </div>
 
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const fileLabel = document.getElementById('fileLabel');
-    const convertBtn = document.getElementById('convertBtn');
-    const originalPreview = document.getElementById('originalPreview');
-    const svgContainer = document.getElementById('svgContainer');
-    const previewSection = document.getElementById('previewSection');
-    const codeSection = document.getElementById('codeSection');
-    const svgCodeTextarea = document.getElementById('svgCode');
-    const copyBtn = document.getElementById('copyBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
+  <div class="header-right">
+    <span class="status"><i class="status-dot"></i>LOCAL PROCESSING</span>
+    <button class="btn" id="clearAll">リセット</button>
+  </div>
+</header>
 
-    const modeSelect = document.getElementById('mode');
-    const maxDimRange = document.getElementById('maxDimension');
-    const dimVal = document.getElementById('dimVal');
+<main>
 
-    let loadedImg = null;
-    let currentSvgString = '';
+<aside class="sidebar">
 
-    maxDimRange.addEventListener('input', (e) => dimVal.textContent = e.target.value);
+  <section class="panel">
+    <div class="panel-heading">
+      <span>画像ファイル</span>
+      <span id="fileCount" class="value">0 FILES</span>
+    </div>
 
-    // 画像選択時の処理
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    <div class="panel-body">
+      <div class="dropzone" id="dropzone" role="button" tabindex="0">
+        <div class="drop-icon">↥</div>
+        <div class="drop-title">画像を追加</div>
+        <div class="drop-sub">
+          クリックまたはドラッグ＆ドロップ<br>
+          PNG / JPG / WEBP / BMP / GIF
+        </div>
+      </div>
 
-      fileLabel.textContent = `選択中: ${file.name}`;
-      const reader = new FileReader();
+      <input id="fileInput" type="file"
+        accept=".png,.jpg,.jpeg,.webp,.bmp,.gif,image/*" multiple>
 
-      reader.onload = function(event) {
-        loadedImg = new Image();
-        loadedImg.onload = function() {
-          originalPreview.src = event.target.result;
-          previewSection.style.display = 'grid';
-          svgContainer.innerHTML = '';
-          codeSection.style.display = 'none';
-          convertBtn.disabled = false;
-        };
-        loadedImg.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+      <div class="file-list" id="fileList"></div>
+    </div>
+  </section>
 
-    // 変換ボタン押下
-    convertBtn.addEventListener('click', () => {
-      if (!loadedImg) return;
+  <section class="panel">
+    <div class="panel-heading">変換設定</div>
 
-      const mode = modeSelect.value;
-      const maxDim = parseInt(maxDimRange.value, 10);
+    <div class="panel-body">
 
-      let width = loadedImg.width;
-      let height = loadedImg.height;
+      <div class="control">
+        <div class="control-head">
+          <label for="mode">出力方式</label>
+        </div>
+        <select id="mode">
+          <option value="vector">ベクター化 SVG</option>
+          <option value="embed">画像埋め込み SVG</option>
+        </select>
+      </div>
 
-      // リサイズ計算
-      if (width > maxDim || height > maxDim) {
-        if (width > height) {
-          height = Math.round((height * maxDim) / width);
-          width = maxDim;
-        } else {
-          width = Math.round((width * maxDim) / height);
-          height = maxDim;
-        }
+      <div id="vectorSettings">
+
+        <div class="control">
+          <div class="control-head">
+            <label for="colors">色数</label>
+            <span class="value" id="colorsValue">16</span>
+          </div>
+          <input type="range" id="colors" min="2" max="64" value="16">
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="scale">処理解像度</label>
+            <span class="value" id="scaleValue">100%</span>
+          </div>
+          <input type="range" id="scale" min="10" max="100" step="5" value="100">
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="simplify">輪郭の簡略化</label>
+            <span class="value" id="simplifyValue">1.5</span>
+          </div>
+          <input type="range" id="simplify" min="0" max="5" step=".1" value="1.5">
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="threshold">透明度しきい値</label>
+            <span class="value" id="thresholdValue">20</span>
+          </div>
+          <input type="range" id="threshold" min="0" max="250" value="20">
+        </div>
+
+        <div class="toggle-row">
+          <span>アンチエイリアス処理</span>
+          <input class="toggle" type="checkbox" id="smooth" checked>
+        </div>
+
+        <div class="toggle-row">
+          <span>背景を白として処理</span>
+          <input class="toggle" type="checkbox" id="whiteBg">
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="control-head">
+          <label for="maxSize">最大出力サイズ</label>
+        </div>
+        <select id="maxSize">
+          <option value="2048">2048 px</option>
+          <option value="4096" selected>4096 px</option>
+          <option value="8192">8192 px</option>
+        </select>
+      </div>
+
+      <button class="btn primary full" id="convertBtn" disabled>
+        ✦ SVGに変換
+      </button>
+
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">エクスポート</div>
+    <div class="panel-body">
+      <div class="btn-row">
+        <button class="btn secondary" id="saveBtn" disabled>SVG保存</button>
+        <button class="btn" id="zipBtn" disabled>ZIP保存</button>
+      </div>
+      <div style="height:8px"></div>
+      <button class="btn full" id="copyBtn" disabled>
+        SVGコードをコピー
+      </button>
+    </div>
+  </section>
+
+</aside>
+
+<section class="workspace">
+
+  <div class="toolbar">
+    <div class="tabs">
+      <button class="tab active" id="originalTab">ORIGINAL</button>
+      <button class="tab" id="outputTab">SVG OUTPUT</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="fitBtn">表示をリセット</button>
+      <button class="btn primary" id="quickSave" disabled>ダウンロード ↓</button>
+    </div>
+  </div>
+
+  <section class="panel preview-panel">
+
+    <div class="preview-head">
+      <strong id="previewTitle">プレビュー</strong>
+      <span class="value" id="previewFormat">NO IMAGE</span>
+    </div>
+
+    <div class="preview-stage" id="previewStage">
+      <div class="empty">
+        <div class="empty-icon">◈</div>
+        <strong>VECTOR FORGE</strong><br>
+        画像を追加すると、ここにプレビューが表示されます。
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <div class="preview-footer">
+      <span id="imageDimensions">画像未選択</span>
+      <span id="outputInfo">出力待機中</span>
+    </div>
+
+  </section>
+
+  <section class="panel result-panel">
+    <div class="panel-heading">
+      <span>SVG SOURCE</span>
+      <div class="result-tabs">
+        <button class="active" id="codeTab">CODE</button>
+        <button id="infoTab">INFO</button>
+      </div>
+    </div>
+
+    <textarea id="codeArea" class="code-area"
+      spellcheck="false"
+      placeholder="変換後のSVGコードがここに表示されます。"
+      readonly></textarea>
+
+    <div id="infoArea" class="result-empty hidden">
+      まだ変換結果がありません。
+    </div>
+  </section>
+
+</section>
+</main>
+
+<footer>
+  <span>VECTOR FORGE · CLIENT-SIDE SVG CONVERTER</span>
+  <span>Files are processed locally in your browser.</span>
+</footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   VECTOR FORGE APPLICATION
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+
+const state = {
+  files: [],
+  activeId: null,
+  results: new Map(),
+  previewMode: "original",
+  busy: false
+};
+
+let nextId = 1;
+let toastTimer = null;
+
+const SUPPORTED_EXTENSIONS = [
+  "png", "jpg", "jpeg", "webp", "bmp", "gif"
+];
+
+function toast(message) {
+  const element = $("toast");
+
+  element.textContent = message;
+  element.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    element.classList.remove("show");
+  }, 2800);
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1048576).toFixed(2) + " MB";
+}
+
+function safeName(name) {
+  return name
+    .replace(/\.[^.]+$/, "")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .slice(0, 100) || "image";
+}
+
+function getActiveFile() {
+  return state.files.find(file => file.id === state.activeId) || null;
+}
+
+function getActiveResult() {
+  return state.results.get(state.activeId) || null;
+}
+
+function updateButtons() {
+  const hasFile = !!getActiveFile();
+  const hasResult = !!getActiveResult();
+
+  $("convertBtn").disabled = !hasFile || state.busy;
+  $("saveBtn").disabled = !hasResult || state.busy;
+  $("zipBtn").disabled = state.results.size === 0 || state.busy;
+  $("copyBtn").disabled = !hasResult;
+  $("quickSave").disabled = !hasResult;
+}
+
+function updateFileCount() {
+  $("fileCount").textContent = `${state.files.length} FILES`;
+}
+
+function updateSettingsLabels() {
+  $("colorsValue").textContent = $("colors").value;
+  $("scaleValue").textContent = $("scale").value + "%";
+  $("simplifyValue").textContent =
+    Number($("simplify").value).toFixed(1);
+  $("thresholdValue").textContent = $("threshold").value;
+}
+
+["colors", "scale", "simplify", "threshold"].forEach(id => {
+  $(id).addEventListener("input", updateSettingsLabels);
+});
+
+$("mode").addEventListener("change", () => {
+  $("vectorSettings").classList.toggle(
+    "hidden",
+    $("mode").value !== "vector"
+  );
+});
+
+function setProgress(value) {
+  $("progress").style.width =
+    Math.max(0, Math.min(100, value)) + "%";
+}
+
+function setBusy(value) {
+  state.busy = value;
+
+  $("convertBtn").textContent = value
+    ? "処理中..."
+    : "✦ SVGに変換";
+
+  updateButtons();
+}
+
+/* =========================================================
+   FILE TYPE DETECTION
+   ========================================================= */
+
+function isSupportedImage(file) {
+  if (!file) return false;
+
+  if (file.type && file.type.startsWith("image/")) {
+    return true;
+  }
+
+  const extension = file.name
+    .split(".")
+    .pop()
+    .toLowerCase();
+
+  return SUPPORTED_EXTENSIONS.includes(extension);
+}
+
+/* =========================================================
+   IMAGE LOADING
+   ========================================================= */
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      if (!image.naturalWidth || !image.naturalHeight) {
+        URL.revokeObjectURL(url);
+        reject(new Error("画像サイズを取得できません。"));
+        return;
       }
 
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(loadedImg, 0, 0, width, height);
-
-      if (mode === 'embed') {
-        // 画像埋め込み型SVG生成
-        const base64 = canvas.toDataURL('image/png');
-        currentSvgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">\n  <image href="${base64}" width="${width}" height="${height}" />\n</svg>`;
-      } else {
-        // ピクセルベクター型SVG生成
-        const imgData = ctx.getImageData(0, 0, width, height).data;
-        let rects = '';
-
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4;
-            const r = imgData[idx];
-            const g = imgData[idx + 1];
-            const b = imgData[idx + 2];
-            const a = imgData[idx + 3] / 255;
-
-            if (a > 0.01) {
-              const color = `rgba(${r},${g},${b},${a.toFixed(2)})`;
-              rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${color}"/>`;
-            }
-          }
-        }
-
-        currentSvgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">\n${rects}\n</svg>`;
-      }
-
-      // 結果表示
-      svgContainer.innerHTML = currentSvgString;
-      svgCodeTextarea.value = currentSvgString;
-      codeSection.style.display = 'block';
-    });
-
-    // コピー
-    copyBtn.addEventListener('click', () => {
-      if (!currentSvgString) return;
-      navigator.clipboard.writeText(currentSvgString).then(() => {
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = 'コピーしました！';
-        setTimeout(() => copyBtn.textContent = originalText, 2000);
+      resolve({
+        image,
+        url,
+        width: image.naturalWidth,
+        height: image.naturalHeight
       });
-    });
+    };
 
-    // ダウンロード
-    downloadBtn.addEventListener('click', () => {
-      if (!currentSvgString) return;
-      const blob = new Blob([currentSvgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'converted.svg';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("画像を読み込めませんでした: " + file.name));
+    };
+
+    image.src = url;
+  });
+}
+
+/* =========================================================
+   FILE IMPORT
+   ========================================================= */
+
+async function addFiles(fileList) {
+  const files = Array.from(fileList || []);
+
+  if (!files.length) return;
+
+  const accepted = files.filter(isSupportedImage);
+
+  if (!accepted.length) {
+    toast("対応している画像ファイルを選択してください。");
+    return;
+  }
+
+  let successCount = 0;
+
+  for (const file of accepted) {
+    try {
+      const loaded = await loadImage(file);
+
+      const entry = {
+        id: nextId++,
+        file,
+        image: loaded.image,
+        url: loaded.url,
+        name: file.name,
+        width: loaded.width,
+        height: loaded.height
+      };
+
+      state.files.push(entry);
+
+      if (state.activeId === null) {
+        state.activeId = entry.id;
+      }
+
+      successCount++;
+
+    } catch (error) {
+      console.error(error);
+      toast(error.message);
+    }
+  }
+
+  renderFileList();
+  renderPreview();
+  updateFileCount();
+  updateButtons();
+
+  if (successCount > 0) {
+    toast(`${successCount}個の画像を読み込みました。`);
+  }
+}
+
+/* =========================================================
+   FILE LIST
+   ========================================================= */
+
+function removeFile(id) {
+  const entry = state.files.find(file => file.id === id);
+
+  if (entry) {
+    URL.revokeObjectURL(entry.url);
+  }
+
+  state.files = state.files.filter(file => file.id !== id);
+  state.results.delete(id);
+
+  if (state.activeId === id) {
+    state.activeId = state.files[removeChild(a);
       URL.revokeObjectURL(url);
     });
   </script>
