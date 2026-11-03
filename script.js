@@ -547,3 +547,288 @@ function updateFileSummary() {
 
     updateExportButtons();
 }
+/* =========================================
+   FILE LIST RENDERING
+========================================= */
+
+function renderFileList() {
+    if (!DOM.fileList) {
+        return;
+    }
+
+    DOM.fileList.replaceChildren();
+
+    if (state.files.length === 0) {
+        const empty = document.createElement("div");
+
+        empty.className = "empty-files";
+        empty.textContent = "No images imported yet.";
+
+        DOM.fileList.appendChild(empty);
+        return;
+    }
+
+    for (const entry of state.files) {
+        const item = document.createElement("div");
+
+        item.className = "file-item";
+
+        if (entry.id === state.activeId) {
+            item.classList.add("active");
+        }
+
+        const thumbnail = document.createElement("div");
+        thumbnail.className = "file-thumbnail";
+
+        const image = document.createElement("img");
+        image.alt = "";
+        image.loading = "lazy";
+
+        const thumbnailURL = URL.createObjectURL(entry.file);
+
+        image.src = thumbnailURL;
+
+        image.addEventListener("load", () => {
+            URL.revokeObjectURL(thumbnailURL);
+        }, { once: true });
+
+        image.addEventListener("error", () => {
+            URL.revokeObjectURL(thumbnailURL);
+        }, { once: true });
+
+        thumbnail.appendChild(image);
+
+        const details = document.createElement("div");
+        details.className = "file-details";
+
+        const name = document.createElement("div");
+        name.className = "file-name";
+        name.textContent = entry.name;
+        name.title = entry.name;
+
+        const metadata = document.createElement("div");
+        metadata.className = "file-meta";
+
+        metadata.textContent =
+            `${entry.width} × ${entry.height} · ${formatBytes(entry.size)}`;
+
+        details.append(name, metadata);
+
+        const actions = document.createElement("div");
+        actions.className = "file-actions";
+
+        const removeButton = document.createElement("button");
+
+        removeButton.type = "button";
+        removeButton.className = "file-remove";
+        removeButton.textContent = "×";
+        removeButton.title = "Remove file";
+        removeButton.setAttribute("aria-label", `Remove ${entry.name}`);
+
+        removeButton.addEventListener("click", event => {
+            event.stopPropagation();
+            removeFile(entry.id);
+        });
+
+        actions.appendChild(removeButton);
+
+        item.append(thumbnail, details, actions);
+
+        item.addEventListener("click", () => {
+            selectFile(entry.id);
+        });
+
+        DOM.fileList.appendChild(item);
+    }
+}
+
+/* =========================================
+   ACTIVE FILE DISPLAY
+========================================= */
+
+function updateActiveFile() {
+    const entry = getActiveFile();
+    const result = getActiveResult();
+
+    if (!entry) {
+        showEmptyPreview();
+        updateExportButtons();
+        return;
+    }
+
+    if (DOM.activeFileLabel) {
+        DOM.activeFileLabel.textContent = entry.name;
+    }
+
+    if (DOM.previewDimensions) {
+        DOM.previewDimensions.textContent =
+            `${entry.width} × ${entry.height}`;
+    }
+
+    if (state.activeTab === "output" && result) {
+        showSvgPreview(result.svg);
+    } else if (state.activeTab === "code" && result) {
+        showCodePreview(result.svg);
+    } else if (state.activeTab === "info" && result) {
+        showInfoPreview(entry, result);
+    } else {
+        showOriginalPreview(entry);
+    }
+
+    updateExportButtons();
+}
+
+/* =========================================
+   PREVIEW HELPERS
+========================================= */
+
+function clearPreviewURL() {
+    if (state.previewURL) {
+        URL.revokeObjectURL(state.previewURL);
+        state.previewURL = null;
+    }
+}
+
+function hidePreviewViews() {
+    if (DOM.previewImage) {
+        DOM.previewImage.classList.remove("visible");
+        DOM.previewImage.removeAttribute("src");
+    }
+
+    if (DOM.previewPlaceholder) {
+        DOM.previewPlaceholder.hidden = true;
+    }
+
+    if (DOM.codePanel) {
+        DOM.codePanel.hidden = true;
+    }
+
+    if (DOM.infoPanel) {
+        DOM.infoPanel.hidden = true;
+    }
+}
+
+function showEmptyPreview() {
+    clearPreviewURL();
+    hidePreviewViews();
+
+    if (DOM.previewPlaceholder) {
+        DOM.previewPlaceholder.hidden = false;
+    }
+
+    if (DOM.activeFileLabel) {
+        DOM.activeFileLabel.textContent = "No file selected";
+    }
+
+    if (DOM.previewDimensions) {
+        DOM.previewDimensions.textContent = "—";
+    }
+
+    if (DOM.codeArea) {
+        DOM.codeArea.textContent = "";
+    }
+
+    if (DOM.infoContent) {
+        DOM.infoContent.replaceChildren();
+    }
+}
+
+/* =========================================
+   ORIGINAL IMAGE PREVIEW
+========================================= */
+
+function showOriginalPreview(entry) {
+    clearPreviewURL();
+    hidePreviewViews();
+
+    if (!DOM.previewImage) {
+        return;
+    }
+
+    state.previewURL = URL.createObjectURL(entry.file);
+
+    DOM.previewImage.src = state.previewURL;
+    DOM.previewImage.alt = entry.name;
+    DOM.previewImage.classList.add("visible");
+
+    applyZoom();
+}
+
+/* =========================================
+   SVG IMAGE PREVIEW
+========================================= */
+
+function showSvgPreview(svg) {
+    clearPreviewURL();
+    hidePreviewViews();
+
+    if (!DOM.previewImage) {
+        return;
+    }
+
+    const blob = new Blob(
+        [svg],
+        { type: "image/svg+xml;charset=utf-8" }
+    );
+
+    state.previewURL = URL.createObjectURL(blob);
+
+    DOM.previewImage.src = state.previewURL;
+    DOM.previewImage.alt = "Converted SVG preview";
+    DOM.previewImage.classList.add("visible");
+
+    applyZoom();
+}
+
+/* =========================================
+   SVG CODE PREVIEW
+========================================= */
+
+function showCodePreview(svg) {
+    clearPreviewURL();
+    hidePreviewViews();
+
+    if (DOM.codePanel) {
+        DOM.codePanel.hidden = false;
+    }
+
+    if (DOM.codeArea) {
+        DOM.codeArea.textContent = svg;
+    }
+}
+
+/* =========================================
+   PREVIEW ZOOM
+========================================= */
+
+function applyZoom() {
+    if (DOM.previewImage) {
+        DOM.previewImage.style.transform =
+            `scale(${state.zoom})`;
+    }
+
+    if (DOM.zoomLabel) {
+        DOM.zoomLabel.textContent =
+            `${Math.round(state.zoom * 100)}%`;
+    }
+}
+
+function changeZoom(amount) {
+    state.zoom = clamp(
+        state.zoom + amount,
+        0.1,
+        5
+    );
+
+    applyZoom();
+}
+
+function resetZoom() {
+    state.zoom = 1;
+    applyZoom();
+}
+
+function fitPreview() {
+    state.zoom = 1;
+    applyZoom();
+}
