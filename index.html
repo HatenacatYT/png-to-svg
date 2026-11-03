@@ -1,450 +1,1149 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>画像 to SVG 変換ツール (Raster to SVG Vectorizer)</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- ImageTracerJS CDN for Client-side Vectorization -->
-  <script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    code, textarea, .font-mono {
-      font-family: 'Fira Code', monospace;
-    }
-    /* 透明画像のチェック柄背景 */
-    .bg-checkerboard {
-      background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), 
-                        linear-gradient(-45deg, #1e293b 25%, transparent 25%), 
-                        linear-gradient(45deg, transparent 75%, #1e293b 75%), 
-                        linear-gradient(-45deg, transparent 75%, #1e293b 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-      background-color: #0f172a;
-    }
-    /* カスタムスクロールバー */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d18">
+<title>VECTOR FORGE | Image to SVG</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #080d18;
+  --panel: #111c2e;
+  --panel2: #0b1422;
+  --line: #263750;
+  --text: #edf4ff;
+  --muted: #91a2bb;
+  --accent: #65d7ff;
+  --purple: #918bff;
+  --success: #65e0b0;
+  --danger: #ff778e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(
+      900px 500px at 80% -10%,
+      #1c3760 0%,
+      transparent 60%
+    ),
+    var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  color: inherit;
+}
+
+.app {
+  max-width: 1440px;
+  margin: auto;
+  padding: 26px 24px 60px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--purple)
+  );
+  color: #06111e;
+  font-weight: 900;
+  font-size: 22px;
+  box-shadow: 0 8px 28px #65d7ff35;
+}
+
+.brand h1 {
+  font-size: 19px;
+  margin: 0;
+  letter-spacing: .08em;
+}
+
+.brand p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.top-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: #162238;
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: .2s;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.btn.primary {
+  background: linear-gradient(
+    120deg,
+    var(--accent),
+    var(--purple)
+  );
+  border: none;
+  color: #06111e;
+  font-weight: 800;
+}
+
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 370px)
+    minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.panel {
+  background: linear-gradient(
+    180deg,
+    #111c2ef2,
+    #0d1625f2
+  );
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  overflow: hidden;
+  box-shadow: 0 18px 55px #0005;
+}
+
+.panel-head {
+  padding: 17px 18px;
+  border-bottom: 1px solid #ffffff0d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-head h2 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.panel-body {
+  padding: 17px;
+}
+
+.drop {
+  border: 1.5px dashed #3b5879;
+  border-radius: 14px;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  background: #13243a55;
+  transition: .2s;
+}
+
+.drop.drag {
+  border-color: var(--accent);
+  background: #17334a;
+}
+
+.drop-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: #203b58;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.drop strong {
+  font-size: 14px;
+}
+
+.drop span {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.drop .btn {
+  margin-top: 13px;
+}
+
+.file-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 13px;
+  max-height: 230px;
+  overflow: auto;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel2);
+}
+
+.file.selected {
+  border-color: var(--accent);
+}
+
+.thumb {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-info b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.file-info small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.remove {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 19px;
+}
+
+.section {
+  margin-top: 19px;
+}
+
+.section-title {
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: #9eb0c8;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.mode {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.mode button {
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  padding: 11px;
+  border-radius: 10px;
+  text-align: left;
+  font-size: 12px;
+}
+
+.mode button.active {
+  border-color: var(--accent);
+  background: #16334a;
+}
+
+.mode button b {
+  display: block;
+}
+
+.mode button small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.field {
+  margin: 13px 0;
+}
+
+.field label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+.field output {
+  color: var(--accent);
+}
+
+.field select {
+  width: 100%;
+  padding: 9px;
+  border-radius: 9px;
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.field input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin: 11px 0;
+}
+
+.check input {
+  accent-color: var(--accent);
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.action-row .btn {
+  flex: 1;
+}
+
+.workspace {
+  min-width: 0;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.preview-box {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  overflow: hidden;
+  background: var(--panel2);
+}
+
+.preview-head {
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ffffff0d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.preview-head span:last-child {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.preview {
+  height: 310px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background-color: #0b1422;
+  background-image:
+    linear-gradient(45deg,#172338 25%,transparent 25%),
+    linear-gradient(-45deg,#172338 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#172338 75%),
+    linear-gradient(-45deg,transparent 75%,#172338 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+.preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.empty {
+  color: #74869f;
+  text-align: center;
+  font-size: 12px;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.stat {
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel2);
+  min-width: 105px;
+}
+
+.stat small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.stat b {
+  font-size: 13px;
+}
+
+.result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 18px 0 10px;
+}
+
+.result-head h2 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.tabs button {
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+}
+
+.tabs button.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.code {
+  display: none;
+  width: 100%;
+  height: 240px;
+  resize: vertical;
+  background: #07101d;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: #c9e5ff;
+  padding: 13px;
+  font: 11px/1.6 monospace;
+}
+
+.code.show {
+  display: block;
+}
+
+.progress {
+  height: 4px;
+  background: #1b2a40;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 10px;
+  display: none;
+}
+
+.progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    var(--purple)
+  );
+  transition: width .2s;
+}
+
+.log {
+  font-size: 11px;
+  color: var(--muted);
+  min-height: 18px;
+  margin-top: 9px;
+}
+
+.footer {
+  color: #70829b;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 22px;
+}
+
+.light {
+  color-scheme: light;
+  --bg: #edf3fa;
+  --panel: #fff;
+  --panel2: #f5f8fc;
+  --line: #d6e0ec;
+  --text: #172438;
+  --muted: #65768d;
+}
+
+.light body {
+  background: var(--bg);
+}
+
+.light .panel {
+  background: #fff;
+}
+
+.light .drop,
+.light .file,
+.light .preview-box,
+.light .stat,
+.light .field select,
+.light .mode button,
+.light .tabs button {
+  background: #f5f8fc;
+  color: var(--text);
+}
+
+.light .preview {
+  background-color: #f5f8fc;
+}
+
+@media(max-width:900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace {
+    order: -1;
+  }
+
+  .preview {
+    height: 250px;
+  }
+}
+
+@media(max-width:560px) {
+  .app {
+    padding: 17px 12px 35px;
+  }
+
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview {
+    height: 230px;
+  }
+}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-  <!-- ヘッダー -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-500/20">
-        <i data-lucide="sparkles" class="w-6 h-6"></i>
-      </div>
-      <div>
-        <h1 class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent">
-          画像 to SVG コンバーター
-        </h1>
-        <p class="text-xs text-slate-400">サーバー送信なし・ブラウザ内で完結するベクター化ツール</p>
-      </div>
+<body>
+<div class="app">
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">V</div>
+    <div>
+      <h1>VECTOR FORGE</h1>
+      <p>Raster to SVG · Browser-side conversion</p>
     </div>
-    <div class="flex items-center space-x-3">
-      <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-medium flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        GitHub Pages 対応
-      </span>
+  </div>
+
+  <div class="top-actions">
+    <button class="btn" id="themeBtn">☼ Theme</button>
+    <button class="btn" id="clearBtn">リセット</button>
+  </div>
+</header>
+
+<div class="layout">
+
+<aside class="panel">
+  <div class="panel-head">
+    <h2>入力ファイル</h2>
+    <span id="fileCount">0 files</span>
+  </div>
+
+  <div class="panel-body">
+
+    <div class="drop" id="drop">
+      <div class="drop-icon">⇧</div>
+      <strong>画像をドロップ</strong>
+      <span>PNG / WebP / JPEG / GIF / BMP</span>
+      <button class="btn primary" id="browseBtn">
+        ファイルを選択
+      </button>
+      <input
+        id="fileInput"
+        type="file"
+        accept="image/png,image/webp,image/jpeg,image/gif,image/bmp"
+        multiple
+        hidden
+      >
     </div>
-  </header>
 
-  <!-- メインコンテンツ -->
-  <main class="flex-1 p-4 md:p-6 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="file-list" id="fileList"></div>
 
-    <!-- 左カラム: 操作パネルと設定 -->
-    <section class="lg:col-span-4 flex flex-col gap-6">
+    <div class="section">
+      <p class="section-title">変換方式</p>
 
-      <!-- ファイルドロップエリア -->
-      <div class="bg-slate-900 border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-6 transition text-center cursor-pointer group relative overflow-hidden" id="drop-zone">
-        <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-        <div class="flex flex-col items-center justify-center space-y-3 py-4">
-          <div class="w-14 h-14 bg-slate-800 group-hover:bg-indigo-600/20 group-hover:text-indigo-400 text-slate-400 rounded-2xl flex items-center justify-center transition border border-slate-700 group-hover:border-indigo-500/50">
-            <i data-lucide="upload-cloud" class="w-7 h-7"></i>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-slate-200 group-hover:text-indigo-300">画像をドラッグ＆ドロップ</p>
-            <p class="text-xs text-slate-400 mt-1">またはクリックしてファイル選択 (PNG, WEBP, JPEG)</p>
-          </div>
-        </div>
-      </div>
+      <div class="mode">
+        <button class="active" data-mode="embed">
+          <b>SVGラッパー</b>
+          <small>画質維持・高速</small>
+        </button>
 
-      <!-- トレース設定パネル -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-5">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h2 class="font-bold text-slate-200 flex items-center gap-2">
-            <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
-            ベクター化パラメータ設定
-          </h2>
-          <button id="reset-params" class="text-xs text-slate-400 hover:text-white transition">初期値に戻す</button>
-        </div>
-
-        <!-- カラーモード選択 -->
-        <div class="space-y-2">
-          <label class="text-xs font-semibold text-slate-300 block">カラーモード</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" id="btn-color-full" class="param-mode-btn bg-indigo-600 text-white text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 border border-indigo-500">
-              <i data-lucide="palette" class="w-3.5 h-3.5"></i>
-              フルカラー
-            </button>
-            <button type="button" id="btn-color-mono" class="param-mode-btn bg-slate-800 text-slate-400 hover:text-white text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 border border-slate-700">
-              <i data-lucide="contrast" class="w-3.5 h-3.5"></i>
-              白黒シルエット
-            </button>
-          </div>
-        </div>
-
-        <!-- 色数（カラーモード用） -->
-        <div id="colors-control" class="space-y-2">
-          <div class="flex justify-between items-center text-xs">
-            <label for="param-colors" class="font-semibold text-slate-300">使用色数 (階調数)</label>
-            <span id="val-colors" class="font-mono text-indigo-400 font-bold">16</span>
-          </div>
-          <input type="range" id="param-colors" min="2" max="64" value="16" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-          <div class="flex justify-between text-[10px] text-slate-500">
-            <span>2色 (シンプル)</span>
-            <span>64色 (高精細)</span>
-          </div>
-        </div>
-
-        <!-- 詳細度 (Scale / Detail) -->
-        <div class="space-y-2">
-          <div class="flex justify-between items-center text-xs">
-            <label for="param-detail" class="font-semibold text-slate-300">パスの精度・詳細度</label>
-            <span id="val-detail" class="font-mono text-indigo-400 font-bold">1.0</span>
-          </div>
-          <input type="range" id="param-detail" min="0.1" max="3.0" step="0.1" value="1.0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-        </div>
-
-        <!-- ぼかし・ノイズ除去 (Blur Radius) -->
-        <div class="space-y-2">
-          <div class="flex justify-between items-center text-xs">
-            <label for="param-blur" class="font-semibold text-slate-300">輪郭の平滑化 (Blur)</label>
-            <span id="val-blur" class="font-mono text-indigo-400 font-bold">0</span>
-          </div>
-          <input type="range" id="param-blur" min="0" max="5" step="1" value="0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-        </div>
-
-        <!-- トレース実行ボタン -->
-        <button id="convert-btn" disabled class="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-          <i data-lucide="refresh-cw" class="w-4 h-4" id="convert-spinner"></i>
-          <span>SVGに再変換</span>
+        <button data-mode="vector">
+          <b>ベクター化</b>
+          <small>SVGパス生成</small>
         </button>
       </div>
 
-    </section>
+      <p class="hint" id="modeHint">
+        元画像をSVG内部に格納します。
+        見た目を完全に維持できます。
+      </p>
+    </div>
 
-    <!-- 右カラム: プレビュー & コード出力 -->
-    <section class="lg:col-span-8 flex flex-col gap-6">
+    <div class="section" id="vectorSettings" hidden>
+      <p class="section-title">ベクター化設定</p>
 
-      <!-- 画像 プレビュー比較エリア -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h2 class="font-bold text-slate-200 flex items-center gap-2">
-            <i data-lucide="eye" class="w-4 h-4 text-indigo-400"></i>
-            リアルタイムプレビュー比較
-          </h2>
-          <span id="status-badge" class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">
-            画像未選択
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- 元画像 -->
-          <div class="space-y-2">
-            <span class="text-xs font-semibold text-slate-400 block">元画像 (ラスター)</span>
-            <div class="h-64 md:h-80 rounded-xl bg-checkerboard border border-slate-800 flex items-center justify-center overflow-hidden p-2 relative">
-              <img id="img-original" class="max-w-full max-h-full object-contain hidden" alt="元画像">
-              <div id="placeholder-orig" class="text-center text-slate-600 space-y-1">
-                <i data-lucide="image" class="w-8 h-8 mx-auto stroke-1"></i>
-                <p class="text-xs">元画像が表示されます</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 生成SVG -->
-          <div class="space-y-2">
-            <span class="text-xs font-semibold text-slate-400 block">変換後のSVG (ベクター)</span>
-            <div class="h-64 md:h-80 rounded-xl bg-checkerboard border border-slate-800 flex items-center justify-center overflow-hidden p-2 relative">
-              <div id="svg-container" class="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:h-auto"></div>
-              <div id="placeholder-svg" class="text-center text-slate-600 space-y-1">
-                <i data-lucide="vector" class="w-8 h-8 mx-auto stroke-1"></i>
-                <p class="text-xs">ここにSVGが生成されます</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="field">
+        <label>
+          色数
+          <output id="colorsOut">16</output>
+        </label>
+        <input
+          id="colors"
+          type="range"
+          min="2"
+          max="32"
+          value="16"
+        >
       </div>
 
-      <!-- SVGコード Inspector / テキストエリア -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-          <h2 class="font-bold text-slate-200 flex items-center gap-2">
-            <i data-lucide="code" class="w-4 h-4 text-indigo-400"></i>
-            SVGコード出力
-          </h2>
-
-          <div class="flex items-center gap-2">
-            <!-- コピーボタン -->
-            <button id="btn-copy" disabled class="bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-50 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              コードをコピー
-            </button>
-            <!-- ダウンロードボタン -->
-            <button id="btn-download" disabled class="bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              SVG保存
-            </button>
-          </div>
-        </div>
-
-        <!-- SVG テキストエリア -->
-        <div class="relative">
-          <textarea id="svg-output" readonly placeholder="<!-- 画像をアップロードすると、ここに完全なSVGコードが表示されます -->" class="w-full h-48 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-indigo-300 leading-relaxed resize-none focus:outline-none focus:border-indigo-500/50 transition"></textarea>
-        </div>
+      <div class="field">
+        <label>
+          解析解像度
+          <output id="resolutionOut">160 px</output>
+        </label>
+        <input
+          id="resolution"
+          type="range"
+          min="48"
+          max="320"
+          step="16"
+          value="160"
+        >
       </div>
 
-    </section>
+      <div class="field">
+        <label>
+          ディザリング
+          <output id="detailOut">0</output>
+        </label>
+        <input
+          id="detail"
+          type="range"
+          min="0"
+          max="100"
+          value="0"
+        >
+      </div>
 
-  </main>
+      <label class="check">
+        <input type="checkbox" id="transparent" checked>
+        透明部分を保持
+      </label>
 
-  <!-- トースト通知 -->
-  <div id="toast" class="fixed bottom-6 right-6 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
-    <i data-lucide="check-circle" class="w-4 h-4"></i>
-    <span id="toast-msg">コピーしました！</span>
+      <label class="check">
+        <input type="checkbox" id="smooth">
+        パスを滑らかにする
+      </label>
+    </div>
+
+    <div class="section">
+      <p class="section-title">出力設定</p>
+
+      <div class="field">
+        <label>SVG表示倍率</label>
+        <select id="scale">
+          <option value="1">100%</option>
+          <option value="1.5">150%</option>
+          <option value="2">200%</option>
+        </select>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" id="optimize" checked>
+        SVGコードを最適化
+      </label>
+    </div>
+
+    <div class="action-row">
+      <button class="btn primary" id="convertBtn" disabled>
+        変換する
+      </button>
+
+      <button class="btn" id="downloadBtn" disabled>
+        SVG保存
+      </button>
+    </div>
+
+    <div class="action-row">
+      <button class="btn" id="zipBtn" disabled>
+        ZIP保存
+      </button>
+
+      <button class="btn" id="copyBtn" disabled>
+        コードコピー
+      </button>
+    </div>
+
+    <div class="progress" id="progress">
+      <i id="progressBar"></i>
+    </div>
+
+    <div class="log" id="status">
+      画像を追加してください。
+    </div>
+
+  </div>
+</aside>
+
+<main class="workspace">
+<section class="panel">
+
+  <div class="panel-head">
+    <h2>プレビュー</h2>
+    <span id="dimensions">—</span>
   </div>
 
-  <script>
-    // アイコン初期化
-    lucide.createIcons();
+  <div class="panel-body">
 
-    // DOM要素の参照
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const imgOriginal = document.getElementById('img-original');
-    const svgContainer = document.getElementById('svg-container');
-    const svgOutput = document.getElementById('svg-output');
-    const placeholderOrig = document.getElementById('placeholder-orig');
-    const placeholderSvg = document.getElementById('placeholder-svg');
-    const statusBadge = document.getElementById('status-badge');
-    const convertBtn = document.getElementById('convert-btn');
-    const convertSpinner = document.getElementById('convert-spinner');
-    const btnCopy = document.getElementById('btn-copy');
-    const btnDownload = document.getElementById('btn-download');
+    <div class="preview-grid">
 
-    // コントロール
-    const paramColors = document.getElementById('param-colors');
-    const valColors = document.getElementById('val-colors');
-    const paramDetail = document.getElementById('param-detail');
-    const valDetail = document.getElementById('val-detail');
-    const paramBlur = document.getElementById('param-blur');
-    const valBlur = document.getElementById('val-blur');
-    const btnColorFull = document.getElementById('btn-color-full');
-    const btnColorMono = document.getElementById('btn-color-mono');
-    const colorsControl = document.getElementById('colors-control');
+      <div class="preview-box">
+        <div class="preview-head">
+          入力画像
+          <span id="inputMeta">SOURCE</span>
+        </div>
 
-    // 状態管理
-    let currentImageSrc = null;
-    let isMonochrome = false;
-    let originalFileName = 'vectorized';
+        <div class="preview" id="sourcePreview">
+          <div class="empty">
+            画像を選択すると表示されます
+          </div>
+        </div>
+      </div>
 
-    // スライダーの値表示更新
-    paramColors.addEventListener('input', () => valColors.textContent = paramColors.value);
-    paramDetail.addEventListener('input', () => valDetail.textContent = paramDetail.value);
-    paramBlur.addEventListener('input', () => valBlur.textContent = paramBlur.value);
+      <div class="preview-box">
+        <div class="preview-head">
+          SVG出力
+          <span id="outputMeta">OUTPUT</span>
+        </div>
 
-    // カラーモード切り替え
-    btnColorFull.addEventListener('click', () => {
-      isMonochrome = false;
-      btnColorFull.className = 'param-mode-btn bg-indigo-600 text-white text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 border border-indigo-500';
-      btnColorMono.className = 'param-mode-btn bg-slate-800 text-slate-400 hover:text-white text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 border border-slate-700';
-      colorsControl.style.display = 'block';
-    });
+        <div class="preview" id="outputPreview">
+          <div class="empty">
+            変換後のプレビュー
+          </div>
+        </div>
+      </div>
 
-    btnColorMono.addEventListener('click', () => {
-      isMonochrome = true;
-      btnColorMono.className = 'param-mode-btn bg-indigo-600 text-white text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 border border-indigo-500';
-      btnColorFull.className = 'param-mode-btn bg-slate-800 text-slate-400 hover:text-white text-xs font-medium py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 border border-slate-700';
-      colorsControl.style.display = 'none';
-    });
+    </div>
 
-    // ドラッグ＆ドロップ処理
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10');
-      });
-    });
+    <div class="stats">
+      <div class="stat">
+        <small>入力サイズ</small>
+        <b id="inputSize">—</b>
+      </div>
 
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
-      });
-    });
+      <div class="stat">
+        <small>出力サイズ</small>
+        <b id="outputSize">—</b>
+      </div>
 
-    dropZone.addEventListener('drop', (e) => {
-      const files = e.dataTransfer.files;
-      if (files.length > 0) handleFile(files[0]);
-    });
+      <div class="stat">
+        <small>出力形式</small>
+        <b>SVG</b>
+      </div>
 
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) handleFile(e.target.files[0]);
-    });
+      <div class="stat">
+        <small>サイズ変化</small>
+        <b id="ratio">—</b>
+      </div>
+    </div>
 
-    // 画像読み込みと処理
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) {
-        showToast('画像ファイルを選択してください');
-        return;
-      }
+    <div class="result-head">
+      <h2>SVGデータ</h2>
 
-      originalFileName = file.name.replace(/\.[^/.]+$/, "");
+      <div class="tabs">
+        <button class="active" data-tab="preview">
+          プレビュー
+        </button>
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        currentImageSrc = e.target.result;
-        imgOriginal.src = currentImageSrc;
-        imgOriginal.classList.remove('hidden');
-        placeholderOrig.classList.add('hidden');
-        convertBtn.disabled = false;
-        
-        // 自動的に初回変換を実行
-        vectorizeImage();
-      };
-      reader.readAsDataURL(file);
-    }
+        <button data-tab="code">
+          コード
+        </button>
+      </div>
+    </div>
 
-    // ImageTracerJSを用いたベクター変換処理
-    function vectorizeImage() {
-      if (!currentImageSrc) return;
+    <textarea
+      class="code"
+      id="code"
+      spellcheck="false"
+      readonly
+    ></textarea>
 
-      statusBadge.textContent = 'SVG変換中...';
-      statusBadge.className = 'text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/40 animate-pulse';
-      convertSpinner.classList.add('animate-spin');
+    <p class="hint" id="resultHint">
+      画像はブラウザ内で処理されます。
+      サーバーへのアップロードはありません。
+    </p>
 
-      setTimeout(() => {
-        // オプションパラメータ設定
-        const options = {
-          corsenabled: false,
-          ltres: parseFloat(paramDetail.value),
-          qtres: parseFloat(paramDetail.value),
-          pathomit: 8,
-          blurradius: parseInt(paramBlur.value),
-          blurdelta: 20
-        };
+  </div>
+</section>
+</main>
+</div>
 
-        if (isMonochrome) {
-          options.numberofcolors = 2;
-          options.pal = [{r:0,g:0,b:0,a:255}, {r:255,g:255,b:255,a:255}];
-        } else {
-          options.numberofcolors = parseInt(paramColors.value);
-        }
+<div class="footer">
+  VECTOR FORGE · Local processing · SVG Export
+</div>
 
-        try {
-          // ImageTracerJSの実行
-          ImageTracer.imageToSVG(
-            currentImageSrc,
-            function(svgStr) {
-              // DOMに反映
-              svgContainer.innerHTML = svgStr;
-              svgOutput.value = svgStr;
-              placeholderSvg.classList.add('hidden');
+</div>
 
-              // ボタンを有効化
-              btnCopy.disabled = false;
-              btnDownload.disabled = false;
+<script>
+"use strict";
 
-              statusBadge.textContent = '変換完了';
-              statusBadge.className = 'text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/40';
-              convertSpinner.classList.remove('animate-spin');
-            },
-            options
-          );
-        } catch (err) {
-          console.error(err);
-          statusBadge.textContent = 'エラーが発生しました';
-          statusBadge.className = 'text-xs bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full border border-rose-500/40';
-          convertSpinner.classList.remove('animate-spin');
-        }
-      }, 50);
-    }
+const $ = id => document.getElementById(id);
 
-    // 再変換ボタン
-    convertBtn.addEventListener('click', vectorizeImage);
+const state = {
+  files: [],
+  selected: 0,
+  mode: "embed",
+  busy: false,
+  previewUrl: null
+};
 
-    // リセットボタン
-    document.getElementById('reset-params').addEventListener('click', () => {
-      paramColors.value = 16;
-      valColors.textContent = '16';
-      paramDetail.value = 1.0;
-      valDetail.textContent = '1.0';
-      paramBlur.value = 0;
-      valBlur.textContent = '0';
-      btnColorFull.click();
-      if (currentImageSrc) vectorizeImage();
-    });
+const formatSize = bytes => {
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
 
-    // SVGコードコピー機能
-    btnCopy.addEventListener('click', () => {
-      if (!svgOutput.value) return;
-      
-      // execCommand fallback & Clipboard API
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(svgOutput.value);
-      } else {
-        svgOutput.select();
-        document.execCommand('copy');
-      }
-      showToast('SVGコードをコピーしました！');
-    });
+  while (bytes >= 1024 && i < units.length - 1) {
+    bytes /= 1024;
+    i++;
+  }
 
-    // SVGファイルダウンロード機能
-    btnDownload.addEventListener('click', () => {
-      if (!svgOutput.value) return;
+  return `${bytes.toFixed(i ? 2 : 0)} ${units[i]}`;
+};
 
-      const blob = new Blob([svgOutput.value], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${originalFileName}_vectorized.svg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+const escapeXML = text =>
+  String(text).replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&apos;"
+  })[c]);
+
+function status(text) {
+  $("status").textContent = text;
+}
+
+function progress(value, visible = true) {
+  $("progress").style.display = visible ? "block" : "none";
+  $("progressBar").style.width = value + "%";
+}
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => resolve({ img, url });
+
+    img.onerror = () => {
       URL.revokeObjectURL(url);
-      showToast('SVGファイルをダウンロードしました！');
-    });
+      reject(new Error("画像を読み込めません"));
+    };
 
-    // トースト表示機能
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      toastMsg.textContent = message;
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
+    img.src = url;
+  });
+}
+
+function addFiles(files) {
+  const accepted = [...files].filter(file =>
+    /^image\/(png|webp|jpeg|gif|bmp)$/.test(file.type)
+  );
+
+  if (!accepted.length) {
+    status("対応画像を選択してください。");
+    return;
+  }
+
+  for (const file of accepted) {
+    const exists = state.files.some(item =>
+      item.file.name === file.name &&
+      item.file.size === file.size
+    );
+
+    if (!exists) {
+      state.files.push({
+        file,
+        result: null,
+        url: URL.createObjectURL(file)
+      });
     }
-  </script>
-</body>
-</html>
+  }
+
+  renderFiles();
+  selectFile(state.files.length - 1);
+}
+
+function renderFiles() {
+  $("fileCount").textContent =
+    `${state.files.length} files`;
+
+  $("fileList").innerHTML = "";
+
+  state.files.forEach((item, index) => {
+    const row = document.createElement("div");
+
+    row.className =
+      "file" + (index === state.selected ? " selected" : "");
+
+    const img = document.createElement("img");
+    img.className = "thumb";
+    img.src = item.url;
+    img.alt = "";
+
+    const info = document.createElement("div");
+    info.className = "file-info";
+
+    const name = document.createElement("b");
+    name.textContent = item.file.name;
+
+    const meta = document.createElement("small");
+    meta.textContent =
+      `${formatSize(item.file.size)} · ` +
+      (item.result ? "変換済み" : "未変換");
+
+    info.append(name, meta);
+
+    const remove = document.createElement("button");
+    remove.className = "remove";
+    remove.textContent = "×";
+    remove.title = "削除";
+
+    remove.onclick = event => {
+      event.stopPropagation();
+
+      URL.revokeObjectURL(item.url);
+      state.files.splice(index, 1);
+
+      state.selected = Math.max(
+        0,
+        Math.min(state.selected, state.files.length - 1)
+      );
+
+      renderFiles();
+
+      if (state.files.length) {
+        selectFile(state.selected);
+      } else {
+        resetPreview();
+      }
+    };
+
+    row.append(img, info, remove);
+    row.onclick = () => selectFile(index);
+
+    $("fileList").append(row);
+  });
+
+  $("convertBtn").disabled =
+    !state.files.length || state.busy;
+}
+
+async function selectFile(index) {
+  state.selected = index;
+  renderFiles();
+
+  const item = state.files[index];
+  if (!item) return;
+
+  try {
+    const { img } = await loadImage(item.file);
+
+    const preview = new Image();
+    preview.src = item.url;
+    preview.alt = "Source image";
+
+    $("sourcePreview").replaceChildren(preview);
+
+    $("dimensions").textContent =
+      `${img.naturalWidth} × ${img.naturalHeight}`;
+
+    $("inputMeta").textContent =
+      item.file.type.split("/")[1].toUpperCase();
+
+    $("inputSize").textContent =
+      formatSize(item.file.size);
+
+    if (item.result) {
+      showResult(item.result);
+    } else {
+      $("outputPreview").innerHTML =
+        '<div class="empty">まだ変換されていません</div>';
+
+      $("outputSize").textContent = "—";
+      $("ratio").textContent = "—";
+      $("code").value = "";
+
+      $("downloadBtn").disabled = true;
+      $("copyBtn").disabled = true;
+    }
+
+  } catch (error) {
+    status(error.message);
+  }
+}
+
+function resetPreview() {
+  $("sourcePreview").innerHTML =
+    '<div class="empty">画像を選択すると表示されます</div>';
+
+  $("outputPreview").innerHTML =
+    '<div class="empty">変換後のプレビュー</div>';
+
+  $("dimensions").textContent = "—";
+  $("inputSize").textContent = "—";
+  $("outputSize").textContent = "—";
+  $("ratio").textContent = "—";
+  $("code").value = "";
+
+  $("downloadBtn").disabled = true;
+  $("copyBtn").disabled = true;
+  $("convertBtn").disabled = true;
+}
+
+function canvasOf(img, maxDimension) {
+  const scale = Math.min(
+    1,
+    maxDimension / Math.max(
+      img.naturalWidth,
+      img.naturalHeight
+    )
+  );
+
+  const width = Math.max(
+    1,
+    Math.round(img.naturalWidth * scale)
+  );
+
+  const height = Math.max(
+    1,
+    Math.round(img.naturalHeight * scale)
+  );
+
+  const canvas = document.createElement("canvas");
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d", {
+    willReadFrequently: true
+  });
+
+  ctx.drawImage(img, 0, 0, width, height);
+
+  return { canvas, ctx, width, height };
+}
+
+function base64FromDataURL(url) {
+  return url.slice(url.indexOf(",") + 1);
+}
+
+// =====================================================
+// SVG EMBED MODE
+// =====================================================
+
+async function embedSVG(file, img) {
+  let mime = file.type;
+
+  if (!["image/png", "image/webp", "image/jpeg"].includes(mime)) {
+    mime = "image/png";
+  }
+
+  let data;
+
+  if (mime === file.type) {
+    data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () =>
+        resolve(base64FromDataURL(reader.result));
+
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  } else {
+    const { canvas } = canvasOf(
+      img,
+      Math.max(img.naturalWidth, img.naturalHeight)
+    );
+
+ 
