@@ -1345,3 +1345,283 @@ function validatePreparedImage(prepared) {
 
     return true;
 }
+/* =========================================
+   WORKER SOURCE
+========================================= */
+
+function getWorkerSource() {
+    return `
+"use strict";
+
+let tracerReady = false;
+
+try {
+    importScripts(${JSON.stringify(APP_CONFIG.tracerUrl)});
+
+    if (
+        typeof ImageTracer === "undefined" ||
+        typeof ImageTracer.imagedataToSVG !== "function"
+    ) {
+        throw new Error("ImageTracerJS failed to load.");
+    }
+
+    tracerReady = true;
+
+} catch (error) {
+    self.postMessage({
+        type: "init-error",
+        message: error.message || "Tracer initialization failed."
+    });
+}
+
+self.onmessage = function(event) {
+    const message = event.data || {};
+
+    if (message.type !== "convert") {
+        return;
+    }
+
+    if (!tracerReady) {
+        self.postMessage({
+            type: "error",
+            message: "ImageTracerJS is not ready."
+        });
+        return;
+    }
+
+    try {
+        const imageData = {
+            width: message.width,
+            height: message.height,
+            data: new Uint8ClampedArray(message.pixels)
+        };
+
+        const svg = ImageTracer.imagedataToSVG(
+            imageData,
+            message.options
+        );
+
+        if (
+            typeof svg !== "string" ||
+            !svg.includes("<svg")
+        ) {
+            throw new Error("Invalid SVG output.");
+        }
+
+        self.postMessage({
+            type: "complete",
+            svg
+        });
+
+    } catch (error) {
+        self.postMessage({
+            type: "error",
+            message: error.message || "SVG conversion failed."
+        });
+    }
+};
+`;
+}
+
+/* =========================================
+   WORKER CREATION
+========================================= */
+
+function createTracerWorker() {
+    const source = getWorkerSource();
+
+    const blob = new Blob(
+        [source],
+        { type: "application/javascript" }
+    );
+
+    const workerURL = URL.createObjectURL(blob);
+
+    let worker;
+
+    try {
+        worker = new Worker(workerURL);
+    } catch (error) {
+        URL.revokeObjectURL(workerURL);
+        throw new Error(
+            `Unable to create conversion worker: ${error.message}`
+        );
+    }
+
+    worker.addEventListener("error", () => {
+        URL.revokeObjectURL(workerURL);
+    }, { once: true });
+
+    worker.addEventListener("message", event => {
+        if (
+            event.data &&
+            (
+                event.data.type === "complete" ||
+                event.data.type === "error" ||
+                event.data.type === "init-error"
+            )
+        ) {
+            URL.revokeObjectURL(workerURL);
+        }
+    });
+
+    return worker;
+}
+
+/* =========================================
+   WORKER CLEANUP
+========================================= */
+
+function terminateWorker() {
+    if (state.workerTimer) {
+        clearTimeout(state.workerTimer);
+        state.workerTimer = null;
+    }
+
+    if (state.worker) {
+        state.worker.terminate();
+        state.worker = null;
+    }
+}
+
+/* =========================================
+   SVG WORKER CONVERSION
+========================================= */
+
+function convertImageInWorker(prepared, options) {
+    return new Promise((resolve, reject) => {
+        let worker;
+
+        try {
+            worker = createTracerWorker();
+        } catch (error) {
+            reject(error);
+            return;
+        }
+
+        state.worker = worker;
+
+        let settled = false;
+
+        const finish = (callback, value) => {
+            if (settled) {
+                return;
+            }
+
+            settled = true;
+
+            if (state.workerTimer) {
+                clearTimeout(state.workerTimer);
+                state.workerTimer = null;
+            }
+
+            worker.terminate();
+
+            if (state.worker === worker) {
+                state.worker = null;
+            }
+
+            callback(value);
+        };
+
+        state.workerTimer = setTimeout(() => {
+            finish(
+                reject,
+                new Error("SVG conversion timed out.")
+            );
+        }, APP_CONFIG.limits.workerTimeout);
+
+        worker.onmessage = event => {
+            const message = event.data || {};
+
+            if (message.type === "init-error") {
+                finish(
+                    reject,
+                    new Error(message.message)
+                );
+                return;
+            }
+
+            if (message.type === "error") {
+                finish(
+                    reject,
+                    new Error(message.message)
+                );
+                return;
+            }
+
+            if (message.type === "complete") {
+                finish(resolve, message.svg);
+            }
+        };
+
+        worker.onerror = event => {
+            finish(
+                reject,
+                new Error(
+                    event.message || "Worker execution failed."
+                )
+            );
+        };
+
+        try {
+            worker.postMessage({
+                type: "convert",
+
+                width: prepared.width,
+                height: prepared.height,
+
+                pixels: prepared.imageData.data.buffer,
+
+                options
+            }, [
+                prepared.imageData.data.buffer
+            ]);
+
+        } catch (error) {
+            finish(
+                reject,
+                new Error(
+                    `Unable to send image data to worker: ${error.message}`
+                )
+            );
+        }
+    });
+}
+
+/* =========================================
+   SVG OUTPUT VALIDATION
+========================================= */
+
+function validateSvg(svg) {
+    if (typeof svg !== "string" || svg.length === 0) {
+        throw new Error("SVG output is empty.");
+    }
+
+    if (!/<svg[\s>]/i.test(svg)) {
+        throw new Error("SVG root element is missing.");
+    }
+
+    if (!/<\/svg\s*>/i.test(svg)) {
+        throw new Error("SVG output appears incomplete.");
+    }
+
+    return true;
+}
+
+/* =========================================
+   SVG DOCUMENT NORMALIZATION
+========================================= */
+
+function normalizeSvg(svg) {
+    let output = String(svg).trim();
+
+    if (!/xmlns=["']http:\/\/www\.w3\.org\/2000\/svg["']/i.test(output)) {
+        output = output.replace(
+            /<svg\b/i,
+            '<svg xmlns="http://www.w3.org/2000/svg"'
+        );
+    }
+
+    return output;
+}
