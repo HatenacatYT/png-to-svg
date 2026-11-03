@@ -1082,3 +1082,266 @@ function captureConversionSettings() {
 
     return state.currentOptions;
        }
+/* =========================================
+   IMAGE LOADING
+========================================= */
+
+function loadImageElement(file) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+
+        image.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(image);
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("Failed to decode the image."));
+        };
+
+        image.src = url;
+    });
+}
+
+/* =========================================
+   CANVAS SIZE CALCULATION
+========================================= */
+
+function calculateProcessSize(width, height, settings) {
+    const maxDimension = settings.maxSize;
+    const maxPixels = APP_CONFIG.limits.maxProcessPixels;
+
+    let scale = settings.scale;
+
+    const dimensionScale = Math.min(
+        maxDimension / width,
+        maxDimension / height,
+        1
+    );
+
+    scale = Math.min(scale, dimensionScale);
+
+    const requestedWidth = width * scale;
+    const requestedHeight = height * scale;
+
+    const pixelScale = Math.sqrt(
+        maxPixels / (requestedWidth * requestedHeight)
+    );
+
+    scale *= Math.min(1, pixelScale);
+
+    return {
+        width: Math.max(1, Math.round(width * scale)),
+        height: Math.max(1, Math.round(height * scale))
+    };
+}
+
+/* =========================================
+   CANVAS CREATION
+========================================= */
+
+function createProcessingCanvas(width, height) {
+    const canvas = document.createElement("canvas");
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d", {
+        willReadFrequently: true,
+        alpha: true
+    });
+
+    if (!context) {
+        throw new Error("Canvas 2D is not supported.");
+    }
+
+    return {
+        canvas,
+        context
+    };
+}
+
+/* =========================================
+   IMAGE DRAWING
+========================================= */
+
+async function drawImageToCanvas(entry, settings) {
+    const image = await loadImageElement(entry.file);
+
+    const dimensions = calculateProcessSize(
+        image.naturalWidth,
+        image.naturalHeight,
+        settings
+    );
+
+    const { canvas, context } = createProcessingCanvas(
+        dimensions.width,
+        dimensions.height
+    );
+
+    context.clearRect(
+        0,
+        0,
+        dimensions.width,
+        dimensions.height
+    );
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+
+    context.drawImage(
+        image,
+        0,
+        0,
+        dimensions.width,
+        dimensions.height
+    );
+
+    return {
+        canvas,
+        context,
+        width: dimensions.width,
+        height: dimensions.height
+    };
+}
+
+/* =========================================
+   PIXEL TRANSPARENCY PROCESSING
+========================================= */
+
+function processImageAlpha(imageData, settings) {
+    const pixels = imageData.data;
+
+    const preserveAlpha = settings.preserveAlpha;
+    const threshold = settings.threshold;
+    const removeWhite = settings.whiteBg;
+
+    const whiteTolerance = 12;
+
+    for (let i = 0; i < pixels.length; i += 4) {
+        const red = pixels[i];
+        const green = pixels[i + 1];
+        const blue = pixels[i + 2];
+
+        let alpha = pixels[i + 3];
+
+        // Remove nearly transparent pixels.
+        if (threshold > 0 && alpha < threshold) {
+            alpha = 0;
+        }
+
+        // Remove near-white background pixels.
+        if (
+            removeWhite &&
+            red >= 255 - whiteTolerance &&
+            green >= 255 - whiteTolerance &&
+            blue >= 255 - whiteTolerance
+        ) {
+            alpha = 0;
+        }
+
+        // Ignore original transparency when disabled.
+        if (!preserveAlpha && alpha > 0) {
+            alpha = 255;
+        }
+
+        pixels[i + 3] = alpha;
+    }
+
+    return imageData;
+}
+
+/* =========================================
+   GRAYSCALE PROCESSING
+========================================= */
+
+function convertToGrayscale(imageData) {
+    const pixels = imageData.data;
+
+    for (let i = 0; i < pixels.length; i += 4) {
+        const red = pixels[i];
+        const green = pixels[i + 1];
+        const blue = pixels[i + 2];
+
+        const gray = Math.round(
+            red * 0.2126 +
+            green * 0.7152 +
+            blue * 0.0722
+        );
+
+        pixels[i] = gray;
+        pixels[i + 1] = gray;
+        pixels[i + 2] = gray;
+    }
+
+    return imageData;
+}
+
+/* =========================================
+   COMPLETE IMAGE PREPARATION
+========================================= */
+
+async function prepareImageData(entry, settings) {
+    const prepared = await drawImageToCanvas(
+        entry,
+        settings
+    );
+
+    let imageData = prepared.context.getImageData(
+        0,
+        0,
+        prepared.width,
+        prepared.height
+    );
+
+    imageData = processImageAlpha(
+        imageData,
+        settings
+    );
+
+    if (settings.mode === "grayscale") {
+        imageData = convertToGrayscale(imageData);
+    }
+
+    return {
+        imageData,
+        width: prepared.width,
+        height: prepared.height,
+        pixels: prepared.width * prepared.height
+    };
+}
+
+/* =========================================
+   IMAGE PREPARATION VALIDATION
+========================================= */
+
+function validatePreparedImage(prepared) {
+    if (!prepared || !prepared.imageData) {
+        throw new Error("Image preparation failed.");
+    }
+
+    if (
+        prepared.width <= 0 ||
+        prepared.height <= 0
+    ) {
+        throw new Error("Invalid processing dimensions.");
+    }
+
+    if (
+        prepared.pixels >
+        APP_CONFIG.limits.maxProcessPixels
+    ) {
+        throw new Error("Processing image exceeds the pixel limit.");
+    }
+
+    const expectedLength =
+        prepared.width * prepared.height * 4;
+
+    if (prepared.imageData.data.length !== expectedLength) {
+        throw new Error("Image pixel data is incomplete.");
+    }
+
+    return true;
+}
