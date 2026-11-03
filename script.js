@@ -1625,3 +1625,292 @@ function normalizeSvg(svg) {
 
     return output;
 }
+/* =========================================
+   SVG OPTIMIZATION
+========================================= */
+
+function optimizeSvgOutput(svg) {
+    let output = normalizeSvg(svg);
+
+    // Remove XML comments.
+    output = output.replace(/<!--[\s\S]*?-->/g, "");
+
+    // Remove unnecessary whitespace between tags.
+    output = output.replace(/>\s+</g, "><");
+
+    // Remove duplicate whitespace.
+    output = output.replace(/\s{2,}/g, " ");
+
+    return output.trim();
+}
+
+/* =========================================
+   SVG OUTPUT CREATION
+========================================= */
+
+function createSvgBlob(svg) {
+    return new Blob(
+        [svg],
+        {
+            type: "image/svg+xml;charset=utf-8"
+        }
+    );
+}
+
+function createConversionResult(
+    entry,
+    svg,
+    dimensions,
+    duration,
+    settings
+) {
+    const blob = createSvgBlob(svg);
+
+    return {
+        id: entry.id,
+        name: entry.name,
+
+        svg,
+        blob,
+
+        width: dimensions.width,
+        height: dimensions.height,
+
+        sourceWidth: entry.width,
+        sourceHeight: entry.height,
+
+        duration,
+        settings,
+
+        createdAt: Date.now()
+    };
+}
+
+/* =========================================
+   CONVERSION PROGRESS
+========================================= */
+
+function updateProgress(percent, message) {
+    const value = clamp(
+        Math.round(percent),
+        0,
+        100
+    );
+
+    if (DOM.progressPercent) {
+        DOM.progressPercent.textContent = `${value}%`;
+    }
+
+    if (DOM.progressFill) {
+        DOM.progressFill.style.width = `${value}%`;
+    }
+
+    if (DOM.progressMessage) {
+        DOM.progressMessage.textContent = message;
+    }
+}
+
+/* =========================================
+   CONVERSION UI STATE
+========================================= */
+
+function setBusy(busy) {
+    state.busy = Boolean(busy);
+
+    if (DOM.convertBtn) {
+        DOM.convertBtn.disabled =
+            state.busy || state.files.length === 0;
+    }
+
+    if (DOM.cancelBtn) {
+        DOM.cancelBtn.disabled = !state.busy;
+        DOM.cancelBtn.hidden = !state.busy;
+    }
+
+    if (DOM.clearAllBtn) {
+        DOM.clearAllBtn.disabled =
+            state.busy || state.files.length === 0;
+    }
+
+    if (DOM.fileInput) {
+        DOM.fileInput.disabled = state.busy;
+    }
+
+    updateExportButtons();
+}
+
+/* =========================================
+   SINGLE FILE CONVERSION
+========================================= */
+
+async function convertSingleFile(entry, settings) {
+    const startTime = performance.now();
+
+    updateProgress(
+        0,
+        `Preparing ${entry.name}...`
+    );
+
+    const prepared = await prepareImageData(
+        entry,
+        settings
+    );
+
+    validatePreparedImage(prepared);
+
+    if (state.cancelled) {
+        throw new Error("Conversion cancelled.");
+    }
+
+    updateProgress(
+        20,
+        `Tracing ${entry.name}...`
+    );
+
+    const tracerOptions = buildTracerOptions(settings);
+
+    let svg = await convertImageInWorker(
+        prepared,
+        tracerOptions
+    );
+
+    if (state.cancelled) {
+        throw new Error("Conversion cancelled.");
+    }
+
+    validateSvg(svg);
+
+    if (settings.optimizeSvg) {
+        svg = optimizeSvgOutput(svg);
+    } else {
+        svg = normalizeSvg(svg);
+    }
+
+    validateSvg(svg);
+
+    const duration =
+        (performance.now() - startTime) / 1000;
+
+    return createConversionResult(
+        entry,
+        svg,
+        {
+            width: prepared.width,
+            height: prepared.height
+        },
+        duration,
+        settings
+    );
+}
+
+/* =========================================
+   MULTI-FILE CONVERSION
+========================================= */
+
+async function startConversion() {
+    if (state.busy) {
+        return;
+    }
+
+    if (state.files.length === 0) {
+        showToast("Import an image first.", "warning");
+        return;
+    }
+
+    const settings = captureConversionSettings();
+
+    state.cancelled = false;
+    state.currentIndex = 0;
+    state.totalCount = state.files.length;
+
+    setBusy(true);
+
+    const filesToConvert = [...state.files];
+
+    let completed = 0;
+    let failed = 0;
+
+    updateProgress(0, "Starting conversion...");
+
+    try {
+        for (let index = 0; index < filesToConvert.length; index++) {
+            if (state.cancelled) {
+                break;
+            }
+
+            const entry = filesToConvert[index];
+
+            state.currentIndex = index + 1;
+
+            updateProgress(
+                Math.round((index / filesToConvert.length) * 100),
+                `Converting ${entry.name} (${index + 1}/${filesToConvert.length})`
+            );
+
+            try {
+                const result = await convertSingleFile(
+                    entry,
+                    settings
+                );
+
+                if (state.cancelled) {
+                    break;
+                }
+
+                const existingIndex = state.results.findIndex(
+                    item => item.id === entry.id
+                );
+
+                if (existingIndex >= 0) {
+                    state.results[existingIndex] = result;
+                } else {
+                    state.results.push(result);
+                }
+
+                completed++;
+
+            } catch (error) {
+                if (state.cancelled) {
+                    break;
+                }
+
+                failed++;
+
+                console.error(
+                    `Conversion failed: ${entry.name}`,
+                    error
+                );
+
+                showToast(
+                    `${entry.name}: ${error.message}`,
+                    "error"
+                );
+            }
+        }
+
+        if (state.cancelled) {
+            updateProgress(0, "Conversion cancelled.");
+            showToast("Conversion cancelled.", "warning");
+        } else {
+            updateProgress(
+                100,
+                `Finished: ${completed} converted, ${failed} failed.`
+            );
+
+            if (completed > 0) {
+                showToast(
+                    `${completed} image(s) converted.`,
+                    "success"
+                );
+            }
+        }
+
+    } finally {
+        terminateWorker();
+        setBusy(false);
+
+        renderFileList();
+        updateActiveFile();
+        updateExportButtons();
+    }
+}
