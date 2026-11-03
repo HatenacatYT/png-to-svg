@@ -1914,3 +1914,217 @@ async function startConversion() {
         updateExportButtons();
     }
 }
+/* =========================================
+   CONVERSION CANCELLATION
+========================================= */
+
+function cancelConversion() {
+    if (!state.busy) {
+        return;
+    }
+
+    state.cancelled = true;
+
+    updateProgress(
+        0,
+        "Cancelling conversion..."
+    );
+
+    // Worker processing is stopped immediately.
+    terminateWorker();
+
+    showToast(
+        "Cancellation requested.",
+        "warning"
+    );
+}
+
+/* =========================================
+   PREVIEW TAB MANAGEMENT
+========================================= */
+
+function setActiveTab(tab) {
+    const validTabs = [
+        "original",
+        "output",
+        "code",
+        "info"
+    ];
+
+    if (!validTabs.includes(tab)) {
+        return;
+    }
+
+    state.activeTab = tab;
+
+    const tabElements = {
+        original: DOM.originalTab,
+        output: DOM.outputTab,
+        code: DOM.codeTab,
+        info: DOM.infoTab
+    };
+
+    for (const [name, element] of Object.entries(tabElements)) {
+        if (!element) {
+            continue;
+        }
+
+        const active = name === tab;
+
+        element.classList.toggle("active", active);
+        element.setAttribute(
+            "aria-selected",
+            String(active)
+        );
+    }
+
+    if (DOM.previewFormat) {
+        const labels = {
+            original: "ORIGINAL",
+            output: "SVG OUTPUT",
+            code: "SVG CODE",
+            info: "IMAGE INFO"
+        };
+
+        DOM.previewFormat.textContent = labels[tab];
+    }
+
+    updateActiveFile();
+}
+
+/* =========================================
+   PREVIEW TAB ACTIONS
+========================================= */
+
+function showOriginalTab() {
+    setActiveTab("original");
+}
+
+function showOutputTab() {
+    if (!getActiveResult()) {
+        showToast(
+            "Convert an image before viewing SVG output.",
+            "warning"
+        );
+        return;
+    }
+
+    setActiveTab("output");
+}
+
+function showCodeTab() {
+    if (!getActiveResult()) {
+        showToast(
+            "Convert an image before viewing SVG code.",
+            "warning"
+        );
+        return;
+    }
+
+    setActiveTab("code");
+}
+
+function showInfoTab() {
+    if (!getActiveFile()) {
+        showToast(
+            "Select an image first.",
+            "warning"
+        );
+        return;
+    }
+
+    setActiveTab("info");
+}
+
+/* =========================================
+   ZOOM CONTROLS
+========================================= */
+
+function zoomIn() {
+    changeZoom(0.1);
+}
+
+function zoomOut() {
+    changeZoom(-0.1);
+}
+
+function zoomToDefault() {
+    resetZoom();
+}
+
+function fitImageToStage() {
+    fitPreview();
+
+    if (!DOM.previewStage || !DOM.previewImage) {
+        return;
+    }
+
+    const image = DOM.previewImage;
+
+    if (!image.naturalWidth || !image.naturalHeight) {
+        return;
+    }
+
+    const stage = DOM.previewStage;
+
+    const availableWidth = Math.max(
+        1,
+        stage.clientWidth - 56
+    );
+
+    const availableHeight = Math.max(
+        1,
+        stage.clientHeight - 56
+    );
+
+    const scaleX = availableWidth / image.naturalWidth;
+    const scaleY = availableHeight / image.naturalHeight;
+
+    state.zoom = clamp(
+        Math.min(scaleX, scaleY, 1),
+        0.1,
+        5
+    );
+
+    applyZoom();
+}
+
+/* =========================================
+   PREVIEW KEYBOARD SUPPORT
+========================================= */
+
+function handlePreviewKeyboard(event) {
+    if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLSelectElement
+    ) {
+        return;
+    }
+
+    if (event.key === "+" || event.key === "=") {
+        zoomIn();
+    } else if (event.key === "-") {
+        zoomOut();
+    } else if (event.key === "0") {
+        zoomToDefault();
+    }
+}
+
+/* =========================================
+   PREVIEW WHEEL ZOOM
+========================================= */
+
+function handlePreviewWheel(event) {
+    if (!event.ctrlKey || !DOM.previewStage?.contains(event.target)) {
+        return;
+    }
+
+    event.preventDefault();
+
+    if (event.deltaY < 0) {
+        zoomIn();
+    } else {
+        zoomOut();
+    }
+}
