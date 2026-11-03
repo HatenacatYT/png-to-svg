@@ -2128,3 +2128,258 @@ function handlePreviewWheel(event) {
         zoomOut();
     }
 }
+/* =========================================
+   DOWNLOAD UTILITIES
+========================================= */
+
+function sanitizeFilename(filename) {
+    return String(filename)
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+        .replace(/[. ]+$/g, "")
+        .trim() || "vector";
+}
+
+function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1000);
+}
+
+/* =========================================
+   SVG DOWNLOAD
+========================================= */
+
+function saveSvgResult(id = state.activeId) {
+    const result = getResultById(id);
+
+    if (!result) {
+        showToast("No SVG result available.", "warning");
+        return;
+    }
+
+    const filename =
+        `${sanitizeFilename(getBaseName(result.name))}.svg`;
+
+    downloadBlob(result.blob, filename);
+
+    showToast("SVG file saved.", "success");
+}
+
+/* =========================================
+   SVG CODE COPY
+========================================= */
+
+async function copySvgCode() {
+    const result = getActiveResult();
+
+    if (!result) {
+        showToast("No SVG result available.", "warning");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(result.svg);
+
+        showToast("SVG code copied.", "success");
+
+    } catch (error) {
+        // Clipboard API fallback.
+        const textarea = document.createElement("textarea");
+
+        textarea.value = result.svg;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+
+        document.body.appendChild(textarea);
+
+        textarea.select();
+
+        const copied = document.execCommand("copy");
+
+        textarea.remove();
+
+        if (!copied) {
+            showToast(
+                "Unable to copy SVG code.",
+                "error"
+            );
+            return;
+        }
+
+        showToast("SVG code copied.", "success");
+    }
+}
+
+/* =========================================
+   SVG TO IMAGE
+========================================= */
+
+function loadSvgAsImage(svg) {
+    return new Promise((resolve, reject) => {
+        const blob = createSvgBlob(svg);
+        const url = URL.createObjectURL(blob);
+        const image = new Image();
+
+        image.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(image);
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+
+            reject(
+                new Error("Unable to render SVG image.")
+            );
+        };
+
+        image.src = url;
+    });
+}
+
+/* =========================================
+   PNG CONVERSION
+========================================= */
+
+async function convertSvgToPng(result) {
+    const image = await loadSvgAsImage(result.svg);
+
+    const width = Math.max(
+        1,
+        Math.round(result.width)
+    );
+
+    const height = Math.max(
+        1,
+        Math.round(result.height)
+    );
+
+    if (
+        width * height >
+        APP_CONFIG.limits.maxProcessPixels
+    ) {
+        throw new Error("PNG output exceeds the pixel limit.");
+    }
+
+    const { canvas, context } = createProcessingCanvas(
+        width,
+        height
+    );
+
+    context.clearRect(0, 0, width, height);
+
+    context.drawImage(
+        image,
+        0,
+        0,
+        width,
+        height
+    );
+
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+            if (!blob) {
+                reject(
+                    new Error("PNG encoding failed.")
+                );
+                return;
+            }
+
+            resolve(blob);
+        }, "image/png");
+    });
+}
+
+/* =========================================
+   PNG DOWNLOAD
+========================================= */
+
+async function savePngResult(id = state.activeId) {
+    const result = getResultById(id);
+
+    if (!result) {
+        showToast("No SVG result available.", "warning");
+        return;
+    }
+
+    try {
+        if (DOM.savePngBtn) {
+            DOM.savePngBtn.disabled = true;
+        }
+
+        const blob = await convertSvgToPng(result);
+
+        const filename =
+            `${sanitizeFilename(getBaseName(result.name))}.png`;
+
+        downloadBlob(blob, filename);
+
+        showToast("PNG file saved.", "success");
+
+    } catch (error) {
+        console.error("PNG export failed:", error);
+
+        showToast(
+            `PNG export failed: ${error.message}`,
+            "error"
+        );
+
+    } finally {
+        if (DOM.savePngBtn) {
+            DOM.savePngBtn.disabled = false;
+        }
+
+        updateExportButtons();
+    }
+}
+
+/* =========================================
+   EXPORT BUTTON STATE
+========================================= */
+
+function updateExportButtons() {
+    const result = getActiveResult();
+
+    const hasResult = Boolean(result);
+    const hasFiles = state.files.length > 0;
+
+    if (DOM.copyBtn) {
+        DOM.copyBtn.disabled = !hasResult || state.busy;
+    }
+
+    if (DOM.savePngBtn) {
+        DOM.savePngBtn.disabled = !hasResult || state.busy;
+    }
+
+    if (DOM.saveBtn) {
+        DOM.saveBtn.disabled = !hasResult || state.busy;
+    }
+
+    if (DOM.quickSaveBtn) {
+        DOM.quickSaveBtn.disabled = !hasResult || state.busy;
+    }
+
+    if (DOM.zipBtn) {
+        DOM.zipBtn.disabled =
+            !hasFiles ||
+            state.results.length === 0 ||
+            state.busy;
+    }
+
+    if (DOM.exportInfo) {
+        DOM.exportInfo.textContent = hasResult
+            ? `${formatBytes(result.blob.size)} SVG`
+            : "No converted output";
+    }
+}
