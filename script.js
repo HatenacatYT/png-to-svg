@@ -832,3 +832,253 @@ function fitPreview() {
     state.zoom = 1;
     applyZoom();
 }
+/* =========================================
+   INFO PREVIEW
+========================================= */
+
+function showInfoPreview(entry, result) {
+    clearPreviewURL();
+    hidePreviewViews();
+
+    if (!DOM.infoPanel || !DOM.infoContent) {
+        return;
+    }
+
+    DOM.infoPanel.hidden = false;
+    DOM.infoContent.replaceChildren();
+
+    const cards = [
+        ["FILE NAME", entry.name],
+        ["FILE SIZE", formatBytes(entry.size)],
+        ["SOURCE FORMAT", entry.type || getExtension(entry.name).toUpperCase()],
+        ["SOURCE DIMENSIONS", `${entry.width} × ${entry.height}`],
+        ["SOURCE PIXELS", formatNumber(entry.pixels)],
+        ["SVG SIZE", formatBytes(result.blob.size)],
+        ["SVG DIMENSIONS", `${result.width} × ${result.height}`],
+        ["CONVERSION TIME", `${result.duration.toFixed(2)} s`]
+    ];
+
+    const grid = document.createElement("div");
+    grid.className = "info-grid";
+
+    for (const [label, value] of cards) {
+        const card = document.createElement("div");
+        card.className = "info-card";
+
+        const heading = document.createElement("div");
+        heading.className = "info-card-label";
+        heading.textContent = label;
+
+        const content = document.createElement("div");
+        content.className = "info-card-value";
+        content.textContent = value;
+
+        card.append(heading, content);
+        grid.appendChild(card);
+    }
+
+    const description = document.createElement("div");
+    description.className = "info-description";
+
+    description.textContent =
+        "This image has been converted into scalable vector graphics. " +
+        "SVG can be resized without the usual pixelation associated with raster images.";
+
+    DOM.infoContent.append(grid, description);
+}
+
+/* =========================================
+   SETTINGS VALUE HELPERS
+========================================= */
+
+function readNumber(element, fallback, min, max) {
+    if (!element) {
+        return fallback;
+    }
+
+    const value = Number(element.value);
+
+    if (!Number.isFinite(value)) {
+        return fallback;
+    }
+
+    return clamp(value, min, max);
+}
+
+function readChecked(element, fallback = false) {
+    return element
+        ? Boolean(element.checked)
+        : fallback;
+}
+
+function readSelect(element, fallback) {
+    if (!element || !element.value) {
+        return fallback;
+    }
+
+    return element.value;
+}
+
+/* =========================================
+   CONVERSION SETTINGS
+========================================= */
+
+function getConversionOptions() {
+    const colors = readNumber(
+        DOM.colors,
+        16,
+        2,
+        64
+    );
+
+    const scale = readNumber(
+        DOM.scale,
+        1,
+        0.1,
+        4
+    );
+
+    const simplify = readNumber(
+        DOM.simplify,
+        1,
+        0,
+        10
+    );
+
+    const smooth = readNumber(
+        DOM.smooth,
+        1,
+        0,
+        10
+    );
+
+    const threshold = readNumber(
+        DOM.threshold,
+        0,
+        0,
+        255
+    );
+
+    const maxSize = readNumber(
+        DOM.maxSize,
+        4096,
+        256,
+        12000
+    );
+
+    const mode = readSelect(
+        DOM.mode,
+        "color"
+    );
+
+    return {
+        colors,
+        scale,
+        simplify,
+        smooth,
+        threshold,
+        maxSize,
+        mode,
+
+        whiteBg: readChecked(DOM.whiteBg),
+        preserveAlpha: readChecked(DOM.preserveAlpha, true),
+        layered: readChecked(DOM.layered),
+        smoothEdges: readChecked(DOM.smoothEdges),
+        optimizeSvg: readChecked(DOM.optimizeSvg)
+    };
+}
+
+/* =========================================
+   IMAGETRACER OPTIONS
+========================================= */
+
+function buildTracerOptions(settings) {
+    const simplifyFactor = settings.simplify / 10;
+    const smoothFactor = settings.smooth / 10;
+
+    const options = {
+        numberofcolors: settings.colors,
+
+        // Color quantization and path detection
+        colorsampling: 2,
+        mincolorratio: 0.02,
+
+        // Path precision
+        ltres: 1 + simplifyFactor * 3,
+        qtres: 1 + simplifyFactor * 3,
+
+        // Remove tiny paths
+        pathomit: Math.round(
+            8 - simplifyFactor * 7
+        ),
+
+        // Edge smoothing
+        blurradius: settings.smoothEdges
+            ? Math.max(1, Math.round(smoothFactor * 2))
+            : 0,
+
+        blurdelta: 20 + Math.round(
+            smoothFactor * 30
+        ),
+
+        // Output settings
+        viewbox: true,
+        desc: false,
+        roundcoords: 2,
+
+        // Layering
+        layering: settings.layered,
+
+        // SVG structure
+        strokewidth: 0,
+        linefilter: true
+    };
+
+    if (settings.mode === "grayscale") {
+        options.colorsampling = 0;
+        options.numberofcolors = Math.min(
+            settings.colors,
+            16
+        );
+    }
+
+    return options;
+}
+
+/* =========================================
+   SETTINGS DISPLAY
+========================================= */
+
+function updateSettingsLabels() {
+    const pairs = [
+        [DOM.colors, DOM.colorsValue, value => `${value}`],
+        [DOM.scale, DOM.scaleValue, value => `${value}×`],
+        [DOM.simplify, DOM.simplifyValue, value => `${value}`],
+        [DOM.smooth, DOM.smoothValue, value => `${value}`],
+        [DOM.threshold, DOM.thresholdValue, value => `${value}`]
+    ];
+
+    for (const [input, output, formatter] of pairs) {
+        if (!input || !output) {
+            continue;
+        }
+
+        output.textContent = formatter(input.value);
+    }
+}
+
+/* =========================================
+   OPTION SNAPSHOT
+========================================= */
+
+function captureConversionSettings() {
+    const settings = getConversionOptions();
+
+    state.currentOptions = {
+        ...settings,
+        tracerOptions: buildTracerOptions(settings),
+        capturedAt: Date.now()
+    };
+
+    return state.currentOptions;
+       }
