@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090d16">
+
+    <title>VECTOR FORGE — Image to SVG Studio</title>
+
+    <meta
+        name="description"
+        content="A modern browser-based image to SVG vector conversion studio."
+    >
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Libraries -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+        defer
+    ></script>
+
+    <!-- Application -->
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- ======================================
+         TOP BAR
+    ======================================= -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <div class="brand-symbol">
+                <svg
+                    viewBox="0 0 40 40"
+                    width="36"
+                    height="36"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M20 3L24.5 15.5L37 20L24.5 24.5L20 37L15.5 24.5L3 20L15.5 15.5L20 3Z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linejoin="round"
+                    />
+
+                    <circle
+                        cx="20"
+                        cy="20"
+                        r="4"
+                        fill="currentColor"
+                    />
+                </svg>
+            </div>
+
+            <div class="brand-text">
+                <div class="brand-name">VECTOR FORGE</div>
+                <div class="brand-subtitle">IMAGE TO SVG STUDIO</div>
+            </div>
+
+        </div>
+
+        <div class="topbar-right">
+
+            <div class="engine-status">
+
+                <span
+                    class="status-dot"
+                    id="engineDot"
+                ></span>
+
+                <span id="engineStatus">
+                    ENGINE READY
+                </span>
+
+            </div>
+
+            <div class="version-label">
+                VERSION 2.0.0
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ======================================
+         MAIN CONTENT
+    ======================================= -->
+
+    <main class="main-layout">
+
+        <!-- ==================================
+             LEFT SIDEBAR
+        =================================== -->
+
+        <aside class="sidebar">
+
+            <!-- IMPORT SECTION -->
+
+            <section class="panel import-panel">
+
+                <div class="section-heading">
+
+                    <div>
+                        <div class="section-title">
+                            SOURCE FILES
+                        </div>
+
+                        <div class="section-description">
+                            Import images to convert
+                        </div>
+                    </div>
+
+                    <div
+                        class="file-count"
+                        id="fileCount"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <!-- DROPZONE -->
+
+                <div
+                    class="dropzone"
+                    id="dropzone"
+                    tabindex="0"
+                    role="button"
+                    aria-label="画像ファイルを追加"
+                >
+
+                    <div class="dropzone-icon">
+                        <svg
+                            viewBox="0 0 24 24"
+                            width="34"
+                            height="34"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M12 16V4"></path>
+                            <path d="M7 9L12 4L17 9"></path>
+                            <path d="M4 16V19C4 20.1 4.9 21 6 21H18C19.1 21 20 20.1 20 19V16"></path>
+                        </svg>
+                    </div>
+
+                    <div class="dropzone-title">
+                        Drop your images here
+                    </div>
+
+                    <div class="dropzone-description">
+                        or click to browse files
+                    </div>
+
+                    <div class="supported-formats">
+                        PNG / JPG / JPEG / WEBP / BMP / GIF
+                    </div>
+
+                </div>
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept=".png,.jpg,.jpeg,.webp,.bmp,.gif,image/png,image/jpeg,image/webp,image/bmp,image/gif"
+                    multiple
+                    hidden
+                >
+
+
+                <!-- FILE SUMMARY -->
+
+                <div
+                    class="file-summary"
+                    id="fileSummary"
+                >
+                    <span>NO FILES IMPORTED</span>
+                </div>
+
+
+                <!-- FILE LIST -->
+
+                <div
+                    class="file-list"
+                    id="fileList"
+                >
+
+                    <div class="empty-files">
+                        Your imported files will appear here.
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="text-button clear-all-button"
+                    id="clearAllBtn"
+                    type="button"
+                    disabled
+                >
+                    CLEAR ALL FILES
+                </button>
+
+            </section>
+
+
+            <!-- ==================================
+                 CONVERSION SETTINGS
+            =================================== -->
+
+            <section class="panel settings-panel">
+
+                <div class="section-heading">
+
+                    <div>
+                        <div class="section-title">
+                            VECTOR SETTINGS
+                        </div>
+
+                        <div class="section-description">
+                            Customize conversion quality
+                        </div>
+                    </div>
+
+                    <div class="settings-icon">
+                        ⚙
+                    </div>
+
+                </div>
+
+
+                <!-- COLOR COUNT -->
+
+                <div class="setting-group">
+
+                    <div class="setting-header">
+
+                        <label for="colors">
+                            Color Count
+                        </label>
+
+                        <span
+                            class="setting-value"
+                            id="colorsValue"
+                        >
+                            16
+                        </span>
+
+                    </div>
+
+                    <input
+                        type="range"
+                        id="colors"
+                        min="2"
+                        max="64"
+                        value="16"
+                        step="1"
+                    >
+
+                    <div class="range-labels">
+                        <span>2 COLORS</span>
+                        <span>64 COLORS</span>
+                    </div>
+
+                </div>
+
+
+                <!-- SCALE -->
+
+                <div class="setting-group">
+
+                    <div class="setting-header">
+
+                        <label for="scale">
+                            Output Scale
+                        </label>
+
+                        <span
+                            class="setting-value"
+                            id="scaleValue"
+                        >
+                            100%
+                        </span>
+
+                    </div>
+
+                    <input
+                        type="range"
+                        id="scale"
+                        min="25"
+                        max="200"
+                        value="100"
+                        step="5"
+                    >
+
+                    <div class="range-labels">
+                        <span>25%</span>
+                        <span>200%</span>
+                    </div>
+
+                </div>
+
+
+                <!-- PATH SIMPLIFICATION -->
+
+                <div class="setting-group">
+
+                    <div class="setting-header">
+
+                        <label for="simplify">
+                            Path Simplification
+                        </label>
+
+                        <span
+                            class="setting-value"
+                            id="simplifyValue"
+                        >
+                            2
+                        </span>
+
+                    </div>
+
+                    <input
+                        type="range"
+                        id="simplify"
+                        min="0"
+                        max="10"
+                        value="2"
+                        step="0.5"
+                    >
+
+                    <div class="range-labels">
+                        <span>PRECISE</span>
+                        <span>SIMPLIFIED</span>
+                    </div>
+
+                </div>
+
+
+                <!-- SMOOTHING -->
+
+                <div class="setting-group">
+
+                    <div class="setting-header">
+
+                        <label for="smooth">
+                            Smoothing
+                        </label>
+
+                        <span
+                            class="setting-value"
+                            id="smoothValue"
+                        >
+                            1
+                        </span>
+
+                    </div>
+
+                    <input
+                        type="range"
+                        id="smooth"
+                        min="0"
+                        max="5"
+                        value="1"
+                        step="0.5"
+                    >
+
+                </div>
+
+
+                <!-- CONVERSION MODE -->
+
+                <div class="setting-group">
+
+                    <div class="setting-header">
+
+                        <label for="mode">
+                            Conversion Mode
+                        </label>
+
+                    </div>
+
+                    <select
+                        id="mode"
+                        class="select-control"
+                    >
+
+                        <option value="default">
+                            Standard Vector
+                        </option>
+
+                        <option value="poster">
+                            Posterized
+                        </option>
+
+                        <option value="detailed">
+                            High Detail
+                        </option>
+
+                        <option value="embed">
+                            Embedded Image
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TRANSPARENCY THRESHOLD -->
+
+                <div class="setting-group">
+
+                    <div class="setting-header">
+
+                        <label for="threshold">
+                            Transparency Threshold
+                        </label>
+
+                        <span
+                            class="setting-value"
+                            id="thresholdValue"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+                    <input
+                        type="range"
+                        id="threshold"
+                        min="0"
+                        max="255"
+                        value="0"
+                        step="1"
+                    >
+
+                    <div class="range-labels">
+                        <span>DISABLED</span>
+                        <span>255</span>
+                    </div>
+
+                </div>
+
+
+                <!-- CHECKBOX SETTINGS -->
+
+                <div class="setting-divider"></div>
+
+                <div class="toggle-list">
+
+                    <label class="toggle-row">
+
+                        <span class="toggle-text">
+                            Remove White Background
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            id="whiteBg"
+                        >
+
+                        <span class="toggle-switch"></span>
+
+                    </label>
+
+
+                    <label class="toggle-row">
+
+                        <span class="toggle-text">
+                            Preserve Alpha Channel
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            id="preserveAlpha"
+                            checked
+                        >
+
+                        <span class="toggle-switch"></span>
+
+                    </label>
+
+
+                    <label class="toggle-row">
+
+                        <span class="toggle-text">
+                            Layered SVG
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            id="layered"
+                        >
+
+                        <span class="toggle-switch"></span>
+
+                    </label>
+
+
+                    <label class="toggle-row">
+
+                        <span class="toggle-text">
+                            Smooth Edges
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            id="smoothEdges"
+                            checked
+                        >
+
+                        <span class="toggle-switch"></span>
+
+                    </label>
+
+
+                    <label class="toggle-row">
+
+                        <span class="toggle-text">
+                            Optimize SVG
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            id="optimizeSvg"
+                            checked
+                        >
+
+                        <span class="toggle-switch"></span>
+
+                    </label>
+
+                </div>
+
+
+                <!-- MAXIMUM RESOLUTION -->
+
+                <div class="setting-divider"></div>
+
+                <div class="setting-group">
+
+                    <div class="setting-header">
+
+                        <label for="maxSize">
+                            Processing Resolution
+                        </label>
+
+                    </div>
+
+                    <select
+                        id="maxSize"
+                        class="select-control"
+                    >
+
+                        <option value="1024">
+                            1024 px — Fast
+                        </option>
+
+                        <option value="2048" selected>
+                            2048 px — Balanced
+                        </option>
+
+                        <option value="3072">
+                            3072 px — High Quality
+                        </option>
+
+                        <option value="4096">
+                            4096 px — Maximum
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- CONVERSION BUTTONS -->
+
+                <div class="conversion-actions">
+
+                    <button
+                        class="primary-button"
+                        id="convertBtn"
+                        type="button"
+                        disabled
+                    >
+
+                        <span class="button-icon">
+                            ◈
+                        </span>
+
+                        <span>
+                            CONVERT TO SVG
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        class="secondary-button"
+                        id="cancelBtn"
+                        type="button"
+                        disabled
+                    >
+                        CANCEL PROCESS
+                    </button>
+
+                </div>
+
+            </section>
+
+        </aside>
+
+
+        <!-- ==================================
+             RIGHT WORKSPACE
+        =================================== -->
+
+        <section class="workspace">
+
+
+            <!-- WORKSPACE HEADER -->
+
+            <div class="workspace-header">
+
+                <div class="workspace-title-area">
+
+                    <div class="workspace-title">
+                        WORKSPACE
+                    </div>
+
+                    <div
+                        class="active-file-label"
+                        id="activeFileLabel"
+                    >
+                        No file selected
+                    </div>
+
+                </div>
+
+
+                <div class="workspace-actions">
+
+                    <button
+                        class="icon-button"
+                        id="fitBtn"
+                        type="button"
+                        title="Fit to screen"
+                        aria-label="Fit to screen"
+                    >
+                        ⛶
+                    </button>
+
+                    <button
+                        class="secondary-button small-button"
+                        id="quickSaveBtn"
+                        type="button"
+                        disabled
+                    >
+                        QUICK SAVE
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================
+                 PREVIEW PANEL
+            =================================== -->
+
+            <section class="preview-panel">
+
+
+                <!-- PREVIEW TABS -->
+
+                <div class="preview-toolbar">
+
+                    <div class="preview-tabs">
+
+                        <button
+                            class="preview-tab active"
+                            id="originalTab"
+                            type="button"
+                            data-tab="original"
+                        >
+                            ORIGINAL
+                        </button>
+
+                        <button
+                            class="preview-tab"
+                            id="outputTab"
+                            type="button"
+                            data-tab="output"
+                        >
+                            SVG OUTPUT
+                        </button>
+
+                        <button
+                            class="preview-tab"
+                            id="codeTab"
+                            type="button"
+                            data-tab="code"
+                        >
+                            SVG CODE
+                        </button>
+
+                        <button
+                            class="preview-tab"
+                            id="infoTab"
+                            type="button"
+                            data-tab="info"
+                        >
+                            INFO
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="preview-format"
+                        id="previewFormat"
+                    >
+                        ORIGINAL IMAGE
+                    </div>
+
+                </div>
+
+
+                <!-- PREVIEW CONTENT -->
+
+                <div
+                    class="preview-stage"
+                    id="previewStage"
+                >
+
+                    <!-- IMAGE PREVIEW -->
+
+                    <img
+                        id="previewImage"
+                        class="preview-image"
+                        alt="Image preview"
+                        draggable="false"
+                        hidden
+                    >
+
+
+                    <!-- EMPTY PLACEHOLDER -->
+
+                    <div
+                        class="preview-placeholder"
+                        id="previewPlaceholder"
+                    >
+
+                        <div class="placeholder-symbol">
+                            <svg
+                                viewBox="0 0 120 120"
+                                width="100"
+                                height="100"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+
+                                <rect
+                                    x="17"
+                                    y="17"
+                                    width="86"
+                                    height="86"
+                                    rx="12"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-dasharray="5 5"
+                                />
+
+                                <path
+                                    d="M34 82L53 60L68 75L80 62L95 82"
+                                    stroke="currentColor"
+                                    stroke-width="3"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+
+                                <circle
+                                    cx="43"
+                                    cy="43"
+                                    r="7"
+                                    stroke="currentColor"
+                                    stroke-width="3"
+                                />
+
+                                <path
+                                    d="M60 29V47M51 38H69"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                />
+
+                            </svg>
+                        </div>
+
+
+                        <div class="placeholder-title">
+                            READY TO FORGE
+                        </div>
+
+                        <div class="placeholder-description">
+                            Import an image to begin vector conversion.
+                        </div>
+
+                    </div>
+
+
+                    <!-- SVG CODE PANEL -->
+
+                    <div
+                        class="code-panel"
+                        id="codePanel"
+                        hidden
+                    >
+
+                        <pre><code id="codeArea"></code></pre>
+
+                    </div>
+
+
+                    <!-- INFORMATION PANEL -->
+
+                    <div
+                        class="info-panel"
+                        id="infoPanel"
+                        hidden
+                    >
+
+                        <div
+                            class="info-content"
+                            id="infoContent"
+                        >
+
+                            <div class="info-empty">
+                                No conversion information available.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PREVIEW FOOTER -->
+
+                <div class="preview-footer">
+
+                    <div
+                        class="preview-dimensions"
+                        id="previewDimensions"
+                    >
+                        0 × 0 PX
+                    </div>
+
+
+                    <div class="zoom-controls">
+
+                        <button
+                            class="zoom-button"
+                            id="zoomOutBtn"
+                            type="button"
+                            aria-label="Zoom out"
+                        >
+                            −
+                        </button>
+
+                        <span
+                            class="zoom-label"
+                            id="zoomLabel"
+                        >
+                            100%
+                        </span>
+
+                        <button
+                            class="zoom-button"
+                            id="zoomResetBtn"
+                            type="button"
+                            aria-label="Reset zoom"
+                        >
+                            1:1
+                        </button>
+
+                        <button
+                            class="zoom-button"
+                            id="zoomInBtn"
+                            type="button"
+                            aria-label="Zoom in"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================
+                 PROGRESS PANEL
+            =================================== -->
+
+            <section class="progress-panel">
+
+                <div class="progress-header">
+
+                    <div class="progress-title">
+                        PROCESSING STATUS
+                    </div>
+
+                    <div
+                        class="progress-percent"
+                        id="progressPercent"
+                    >
+                        0%
+                    </div>
+
+                </div>
+
+
+                <div class="progress-track">
+
+                    <div
+                        class="progress-fill"
+                        id="progressFill"
+                        style="width: 0%"
+                    ></div>
+
+                </div>
+
+
+                <div
+                    class="progress-message"
+                    id="progressMessage"
+                >
+                    Waiting for input...
+                </div>
+
+            </section>
+
+
+            <!-- ==================================
+                 EXPORT PANEL
+            =================================== -->
+
+            <section class="export-panel">
+
+                <div class="export-header">
+
+                    <div>
+
+                        <div class="section-title">
+                            EXPORT CENTER
+                        </div>
+
+                        <div
+                            class="export-info"
+                            id="exportInfo"
+                        >
+                            No converted files available.
+                        </div>
+
+                    </div>
+
+                    <div class="export-indicator">
+                        EXPORT
+                    </div>
+
+                </div>
+
+
+                <div class="export-actions">
+
+                    <button
+                        class="export-button"
+                        id="copyBtn"
+                        type="button"
+                        disabled
+                    >
+
+                        <span class="export-button-icon">
+                            ⧉
+                        </span>
+
+                        <span>
+                            COPY SVG
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        class="export-button"
+                        id="savePngBtn"
+                        type="button"
+                        disabled
+                    >
+
+                        <span class="export-button-icon">
+                            ▧
+                        </span>
+
+                        <span>
+                            SAVE PNG
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        class="export-button primary-export"
+                        id="saveBtn"
+                        type="button"
+                        disabled
+                    >
+
+                        <span class="export-button-icon">
+                            ↓
+                        </span>
+
+                        <span>
+                            SAVE SVG
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        class="export-button"
+                        id="zipBtn"
+                        type="button"
+                        disabled
+                    >
+
+                        <span class="export-button-icon">
+                            ▣
+                        </span>
+
+                        <span>
+                            EXPORT ZIP
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================
+                 FOOTER
+            =================================== -->
+
+            <footer class="workspace-footer">
+
+                <div>
+                    VECTOR FORGE
+                    <span class="footer-separator">/</span>
+                    CLIENT-SIDE VECTOR ENGINE
+                </div>
+
+                <div>
+                    ALL PROCESSING RUNS LOCALLY IN YOUR BROWSER
+                </div>
+
+            </footer>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ======================================
+     TOAST NOTIFICATIONS
+======================================= -->
+
+<div
+    class="toast-region"
+    id="toastRegion"
+    aria-live="polite"
+    aria-atomic="true"
+></div>
+
+
+</body>
+</html>
