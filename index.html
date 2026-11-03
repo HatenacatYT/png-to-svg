@@ -8,7 +8,7 @@
 <title>VECTOR FORGE</title>
 
 <style>
-:root{
+:root {
   --bg:#101116;
   --panel:#191b23;
   --panel2:#20232d;
@@ -17,185 +17,339 @@
   --muted:#9299aa;
   --accent:#65c8ff;
   --danger:#ff6878;
-  --radius:13px;
+  --success:#7edca7;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:Inter,"Segoe UI",sans-serif;min-height:100vh
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,"Segoe UI",sans-serif;
+  min-height:100vh;
 }
-button,input,select{font:inherit}
-button{cursor:pointer}
-.app{min-height:100vh;display:flex;flex-direction:column}
-header{
-  height:66px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 25px;border-bottom:1px solid var(--border);
-  background:#14161d;position:sticky;top:0;z-index:5
+button,input,select { font:inherit; }
+button { cursor:pointer; }
+button:disabled { opacity:.4;cursor:not-allowed; }
+header {
+  height:66px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 25px;
+  border-bottom:1px solid var(--border);
+  background:#14161d;
 }
-.brand{display:flex;align-items:center;gap:12px}
-.logo{
-  width:32px;height:32px;border:2px solid var(--accent);
-  transform:rotate(45deg);border-radius:7px;position:relative
+.brand { display:flex;align-items:center;gap:12px; }
+.logo {
+  width:30px;height:30px;
+  border:2px solid var(--accent);
+  transform:rotate(45deg);
+  border-radius:7px;
 }
-.logo:after{
-  content:"";position:absolute;width:9px;height:9px;
-  background:var(--accent);border-radius:2px;left:9px;top:9px
-}
-.brand-name{font-size:17px;font-weight:800;letter-spacing:2px}
-.brand-sub{font-size:10px;color:var(--muted);letter-spacing:2px}
-.header-right{font-size:11px;color:var(--muted)}
-.layout{
-  width:min(1500px,100%);margin:auto;padding:22px;
-  display:grid;grid-template-columns:310px minmax(0,1fr);
-  gap:20px;flex:1
-}
-.panel{
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:var(--radius);overflow:hidden
-}
-.sidebar{padding:17px;display:flex;flex-direction:column;gap:18px}
-.section-title{
-  font-size:11px;font-weight:800;color:var(--muted);
-  letter-spacing:1.5px;margin-bottom:10px
-}
+.brand-name { font-size:17px;font-weight:800;letter-spacing:2px; }
+.brand-sub { font-size:10px;color:var(--muted);letter-spacing:2px; }
+.header-right { font-size:11px;color:var(--muted); }
 
-/* FILE PICKER */
-.dropzone{
-  border:1px dashed #485365;border-radius:11px;padding:23px 12px;
-  text-align:center;background:#151821;transition:.2s;
-  position:relative;overflow:hidden;min-height:125px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center
+.layout {
+  width:min(1500px,100%);
+  margin:auto;
+  padding:22px;
+  display:grid;
+  grid-template-columns:310px minmax(0,1fr);
+  gap:20px;
 }
-.dropzone.drag{border-color:var(--accent);background:#1b2935}
-.dropzone strong{display:block;font-size:13px;margin-bottom:7px}
-.dropzone span{font-size:11px;color:var(--muted)}
-.dropzone-content{pointer-events:none;z-index:1}
-.file-picker{
-  position:absolute;inset:0;width:100%;height:100%;
-  opacity:0;z-index:2;cursor:pointer;
-  font-size:100px
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:13px;
+  overflow:hidden;
 }
-.file-picker:focus-visible{
-  opacity:.05;outline:2px solid var(--accent)
+.sidebar {
+  padding:17px;
+  display:flex;
+  flex-direction:column;
+  gap:17px;
 }
-.picker-hint{
-  margin-top:12px;padding:9px 15px;border-radius:8px;
-  background:var(--accent);color:#07131b;font-size:12px;font-weight:800
+.section-title {
+  font-size:11px;
+  font-weight:800;
+  color:var(--muted);
+  letter-spacing:1.5px;
+  margin-bottom:10px;
 }
-.primary,.secondary,.danger-btn{
-  border:0;border-radius:8px;padding:10px 13px;
-  font-weight:700;font-size:12px;transition:.18s
+.dropzone {
+  border:1px dashed #485365;
+  border-radius:11px;
+  padding:20px 12px;
+  text-align:center;
+  background:#151821;
+  transition:.2s;
 }
-.primary{background:var(--accent);color:#07131b}
-.primary:hover{background:#8bd8ff;transform:translateY(-1px)}
-.primary:disabled,.secondary:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
-.secondary:hover{border-color:var(--accent)}
-.danger-btn{background:#392129;color:#ff9aa5}
-.full{width:100%}
-.file-list{display:flex;flex-direction:column;gap:6px;max-height:230px;overflow:auto}
-.file-item{
-  padding:10px;border:1px solid transparent;border-radius:8px;
-  display:flex;align-items:center;gap:8px;cursor:pointer;
-  background:#151821;min-width:0
+.dropzone.drag {
+  border-color:var(--accent);
+  background:#1b2935;
 }
-.file-item.active{border-color:var(--accent);background:#1c2934}
-.file-icon{color:var(--accent);font-size:17px}
-.file-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
-.file-status{font-size:10px;color:var(--muted)}
-.remove-file{border:0;background:none;color:var(--muted);font-size:16px;padding:2px}
-.remove-file:hover{color:var(--danger)}
-.setting{margin-bottom:14px}
-.setting label{
-  display:flex;justify-content:space-between;gap:8px;
-  font-size:11px;color:#d9deea;margin-bottom:7px
+.dropzone strong {
+  display:block;
+  font-size:13px;
+  margin-bottom:7px;
 }
-.setting small{color:var(--muted)}
-input[type="range"]{width:100%;accent-color:var(--accent)}
-input[type="color"]{
-  width:43px;height:31px;border:1px solid var(--border);
-  border-radius:7px;background:var(--panel2);padding:3px;cursor:pointer
+.dropzone span {
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:12px;
 }
-input[type="checkbox"]{accent-color:var(--accent);width:15px;height:15px}
-.color-row{display:flex;align-items:center;gap:10px}
-.color-value{font-family:monospace;color:var(--muted);font-size:11px}
-.check-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#d9deea}
-select{
-  width:100%;background:var(--panel2);color:var(--text);
-  border:1px solid var(--border);border-radius:7px;padding:9px;font-size:12px
+.primary,.secondary,.danger-btn {
+  border:0;
+  border-radius:8px;
+  padding:10px 13px;
+  font-weight:700;
+  font-size:12px;
+  transition:.18s;
 }
-.main{display:flex;flex-direction:column;gap:16px;min-width:0}
-.workspace{padding:17px;min-height:420px;display:flex;flex-direction:column}
-.workspace-head{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:10px;margin-bottom:14px
+.primary { background:var(--accent);color:#07131b; }
+.primary:hover { background:#8bd8ff; }
+.secondary {
+  background:var(--panel2);
+  color:var(--text);
+  border:1px solid var(--border);
 }
-.workspace-title{font-size:13px;font-weight:800}
-.tabs{display:flex;gap:5px}
-.tab{
-  border:1px solid var(--border);background:var(--panel2);
-  color:var(--muted);padding:7px 11px;border-radius:7px;font-size:11px
+.secondary:hover { border-color:var(--accent); }
+.danger-btn { background:#392129;color:#ff9aa5; }
+.full { width:100%; }
+.file-list {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:230px;
+  overflow:auto;
 }
-.tab.active{color:var(--accent);border-color:var(--accent);background:#1b2935}
-.preview-stage{
-  min-height:330px;flex:1;border:1px solid var(--border);
-  border-radius:10px;overflow:hidden;display:flex;align-items:center;
-  justify-content:center;padding:15px;position:relative;
+.file-item {
+  padding:10px;
+  border:1px solid transparent;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  background:#151821;
+  min-width:0;
+}
+.file-item.active {
+  border-color:var(--accent);
+  background:#1c2934;
+}
+.file-icon { color:var(--accent);font-size:17px; }
+.file-name {
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  flex:1;
+}
+.file-status { font-size:10px;color:var(--muted); }
+.remove-file {
+  border:0;
+  background:none;
+  color:var(--muted);
+  font-size:16px;
+  padding:2px 5px;
+}
+.remove-file:hover { color:var(--danger); }
+
+.setting { margin-bottom:14px; }
+.setting label {
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  font-size:11px;
+  color:#d9deea;
+  margin-bottom:7px;
+}
+.setting small {
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+  margin-top:5px;
+}
+input[type="range"] {
+  display:block;
+  width:100%;
+  height:20px;
+  margin:0;
+  accent-color:var(--accent);
+  cursor:pointer;
+  touch-action:pan-y;
+}
+input[type="color"] {
+  width:43px;
+  height:31px;
+  border:1px solid var(--border);
+  border-radius:7px;
+  background:var(--panel2);
+  padding:3px;
+  cursor:pointer;
+}
+input[type="checkbox"] {
+  accent-color:var(--accent);
+  width:15px;
+  height:15px;
+  cursor:pointer;
+}
+.color-row { display:flex;align-items:center;gap:10px; }
+.color-value { font-family:monospace;color:var(--muted);font-size:11px; }
+.check-row { display:flex;align-items:center;gap:8px; }
+.check-row label { margin:0;cursor:pointer; }
+select {
+  width:100%;
+  background:var(--panel2);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:9px;
+  font-size:12px;
+}
+hr { border:0;border-top:1px solid var(--border);width:100%; }
+
+.main { display:flex;flex-direction:column;gap:16px;min-width:0; }
+.workspace {
+  padding:17px;
+  min-height:420px;
+  display:flex;
+  flex-direction:column;
+}
+.workspace-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:14px;
+}
+.workspace-title { font-size:13px;font-weight:800; }
+.tabs { display:flex;gap:5px; }
+.tab {
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--muted);
+  padding:7px 11px;
+  border-radius:7px;
+  font-size:11px;
+}
+.tab.active {
+  color:var(--accent);
+  border-color:var(--accent);
+  background:#1b2935;
+}
+.preview-stage {
+  min-height:330px;
+  flex:1;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
   background-color:#171a22;
-  background-image:linear-gradient(45deg,#222631 25%,transparent 25%),
-  linear-gradient(-45deg,#222631 25%,transparent 25%),
-  linear-gradient(45deg,transparent 75%,#222631 75%),
-  linear-gradient(-45deg,transparent 75%,#222631 75%);
+  background-image:
+    linear-gradient(45deg,#222631 25%,transparent 25%),
+    linear-gradient(-45deg,#222631 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#222631 75%),
+    linear-gradient(-45deg,transparent 75%,#222631 75%);
   background-size:20px 20px;
-  background-position:0 0,0 10px,10px -10px,-10px 0
+  background-position:0 0,0 10px,10px -10px,-10px 0;
 }
-.preview-stage img{
-  max-width:100%;max-height:540px;object-fit:contain;display:block
+.preview-stage img {
+  max-width:100%;
+  max-height:540px;
+  object-fit:contain;
+  display:block;
 }
-.preview-stage svg{
-  display:block;width:auto;height:auto;max-width:100%;max-height:540px
+.preview-stage svg {
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:100%;
+  max-height:540px;
 }
-.empty-state{text-align:center;color:var(--muted);font-size:12px;line-height:2}
-.empty-state .symbol{font-size:35px;color:#536071}
-.preview-footer{
-  display:flex;justify-content:space-between;gap:10px;
-  color:var(--muted);font-size:10px;margin-top:11px
+.empty-state {
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  line-height:2;
 }
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.actions button{flex:1;min-width:110px}
-.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.info-panel{padding:16px;min-height:150px}
-.info-title{font-size:11px;font-weight:800;color:var(--muted);margin-bottom:10px}
-#codeArea{
-  width:100%;height:170px;resize:vertical;background:#11141b;
-  color:#a9d9f7;border:1px solid var(--border);border-radius:8px;
-  padding:10px;font:11px/1.5 Consolas,monospace
+.empty-symbol { font-size:35px;color:#536071; }
+.preview-footer {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--muted);
+  font-size:10px;
+  margin-top:11px;
 }
-.info-content{font-size:11px;line-height:1.9;color:#c3cada}
-.progress-wrap{height:5px;background:#303440;border-radius:10px;overflow:hidden;margin-top:9px}
-.progress-bar{height:100%;width:0;background:var(--accent);transition:width .2s}
-.status{font-size:11px;color:var(--muted);margin-top:8px;min-height:16px}
-.status.error{color:var(--danger)}
-.status.success{color:#7edca7}
-.hidden{display:none!important}
-hr{border:0;border-top:1px solid var(--border);width:100%}
-footer{text-align:center;padding:15px;color:#606879;font-size:10px}
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr;padding:12px}
-  .sidebar{order:1}.main{order:0}
-  .bottom-grid{grid-template-columns:1fr}
+.actions { display:flex;gap:8px;flex-wrap:wrap; }
+.actions button { flex:1;min-width:110px; }
+.bottom-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+.info-panel { padding:16px;min-height:150px; }
+.info-title {
+  font-size:11px;
+  font-weight:800;
+  color:var(--muted);
+  margin-bottom:10px;
 }
-@media(max-width:520px){
-  header{padding:0 14px}.header-right{display:none}
-  .workspace{padding:11px}
-  .workspace-head{align-items:flex-start;flex-direction:column}
-  .preview-stage{min-height:250px}
+#codeArea {
+  width:100%;
+  height:170px;
+  resize:vertical;
+  background:#11141b;
+  color:#a9d9f7;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  font:11px/1.5 Consolas,monospace;
+}
+.info-content { font-size:11px;line-height:1.9;color:#c3cada; }
+.progress-wrap {
+  height:5px;
+  background:#303440;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:9px;
+}
+.progress-bar {
+  height:100%;
+  width:0;
+  background:var(--accent);
+  transition:width .2s;
+}
+.status {
+  font-size:11px;
+  color:var(--muted);
+  margin-top:8px;
+  min-height:16px;
+  overflow-wrap:anywhere;
+}
+.status.error { color:var(--danger); }
+.status.success { color:var(--success); }
+footer { text-align:center;padding:15px;color:#606879;font-size:10px; }
+
+@media(max-width:900px) {
+  .layout { grid-template-columns:1fr;padding:12px; }
+  .bottom-grid { grid-template-columns:1fr; }
+}
+@media(max-width:520px) {
+  header { padding:0 14px; }
+  .header-right { display:none; }
+  .workspace { padding:11px; }
+  .workspace-head { align-items:flex-start;flex-direction:column; }
+  .preview-stage { min-height:250px; }
 }
 </style>
 </head>
 
 <body>
-<div class="app">
 <header>
   <div class="brand">
     <div class="logo"></div>
@@ -208,86 +362,473 @@ footer{text-align:center;padding:15px;color:#606879;font-size:10px}
 </header>
 
 <div class="layout">
-<aside class="panel sidebar">
+  <aside class="panel sidebar">
 
-  <section>
-    <div class="section-title">01 / Import</div>
-    <div class="dropzone" id="dropzone">
-      <div class="dropzone-content">
+    <section>
+      <div class="section-title">01 / IMPORT</div>
+      <div class="dropzone" id="dropzone">
         <strong>画像をここにドロップ</strong>
         <span>PNG / JPG / WEBP / BMP / GIF</span>
-        <div class="picker-hint">クリックして画像を選択</div>
+        <button class="primary" id="selectFiles" type="button">
+          ファイルを選択
+        </button>
+        <input
+          type="file"
+          id="fileInput"
+          accept="image/png,image/jpeg,image/webp,image/bmp,image/gif"
+          multiple
+          hidden
+        >
       </div>
-      <!-- ネイティブのファイル選択欄を全面に配置 -->
-      <input
-        type="file"
-        id="fileInput"
-        class="file-picker"
-        accept="image/png,image/jpeg,image/webp,image/bmp,image/gif,image/*"
-        multiple
-        aria-label="画像ファイルを選択"
-      >
+    </section>
+
+    <section>
+      <div class="section-title">02 / FILES <span id="fileCount">0</span></div>
+      <div class="file-list" id="fileList">
+        <div class="empty-state">画像がありません</div>
+      </div>
+    </section>
+
+    <hr>
+
+    <section>
+      <div class="section-title">03 / OUTPUT SETTINGS</div>
+
+      <div class="setting">
+        <label>出力方式</label>
+        <select id="outputMode">
+          <option value="vector">ベクター SVG</option>
+          <option value="embed">画像埋め込み SVG</option>
+        </select>
+      </div>
+
+      <div class="setting">
+        <label>カラーモード</label>
+        <select id="colorMode">
+          <option value="color">フルカラー</option>
+          <option value="binary">白黒・2値</option>
+        </select>
+      </div>
+
+      <div class="setting">
+        <label>スケール <output id="scaleValue">1.00x</output></label>
+        <input type="range" id="scale" min="0.25" max="4" step="0.25" value="1">
+      </div>
+
+      <div class="setting">
+        <label>単純化 <output id="simplifyValue">1.0</output></label>
+        <input type="range" id="simplify" min="0.1" max="5" step="0.1" value="1">
+      </div>
+
+      <div class="setting">
+        <label>スムージング <output id="smoothValue">1</output></label>
+        <input type="range" id="smooth" min="0" max="5" step="1" value="1">
+      </div>
+
+      <div class="setting">
+        <label>最大処理サイズ</label>
+        <select id="maxSize">
+          <option value="2">2 MP（軽量）</option>
+          <option value="4">4 MP</option>
+          <option value="8" selected>8 MP（標準）</option>
+          <option value="12">12 MP（高負荷）</option>
+        </select>
+      </div>
+    </section>
+
+    <hr>
+
+    <section>
+      <div class="section-title">04 / COLOR TRANSPARENCY</div>
+
+      <div class="setting">
+        <div class="check-row">
+          <input type="checkbox" id="removeColor">
+          <label for="removeColor">指定した色を透過する</label>
+        </div>
+      </div>
+
+      <div class="setting">
+        <label>透過する色</label>
+        <div class="color-row">
+          <input type="color" id="transparentColor" value="#ffffff">
+          <span class="color-value" id="colorValue">#FFFFFF</span>
+        </div>
+      </div>
+
+      <div class="setting">
+        <label>色の許容差 <output id="toleranceValue">25</output></label>
+        <input type="range" id="tolerance" min="0" max="150" step="1" value="25">
+        <small>値を上げるほど指定色に近い色も透過します。</small>
+      </div>
+
+      <div class="setting">
+        <div class="check-row">
+          <input type="checkbox" id="removeWhite" checked>
+          <label for="removeWhite">白い背景を透過する</label>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <section>
+      <div class="section-title">05 / ADVANCED</div>
+
+      <div class="setting">
+        <label>アルファしきい値 <output id="alphaValue">0</output></label>
+        <input type="range" id="alphaThreshold" min="0" max="255" step="1" value="0">
+      </div>
+
+      <div class="setting">
+        <div class="check-row">
+          <input type="checkbox" id="posterize" checked>
+          <label for="posterize">カラーを整理する</label>
+        </div>
+      </div>
+    </section>
+
+    <button class="primary full" id="convertBtn" type="button">変換を開始</button>
+    <button class="secondary full" id="cancelBtn" type="button" disabled>処理をキャンセル</button>
+  </aside>
+
+  <main class="main">
+    <section class="panel workspace">
+      <div class="workspace-head">
+        <div class="workspace-title">PREVIEW / WORKSPACE</div>
+        <div class="tabs">
+          <button class="tab active" data-mode="original" type="button">ORIGINAL</button>
+          <button class="tab" data-mode="output" type="button">SVG OUTPUT</button>
+        </div>
+      </div>
+
+      <div class="preview-stage" id="previewStage">
+        <div class="empty-state">
+          <div class="empty-symbol">◇</div>
+          画像を読み込むとここにプレビューが表示されます。
+        </div>
+      </div>
+
+      <div class="preview-footer">
+        <span id="previewName">NO FILE SELECTED</span>
+        <span id="previewFormat">WAITING</span>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="primary" id="saveBtn" type="button" disabled>SVGを保存</button>
+      <button class="secondary" id="saveAllBtn" type="button" disabled>すべて保存（ZIP）</button>
+      <button class="secondary" id="copyBtn" type="button" disabled>SVGコードをコピー</button>
     </div>
-  </section>
 
-  <section>
-    <div class="section-title">02 / Files <span id="fileCount">0</span></div>
-    <div class="file-list" id="fileList">
-      <div class="empty-state">画像がありません</div>
+    <div class="bottom-grid">
+      <section class="panel info-panel">
+        <div class="info-title">SVG SOURCE</div>
+        <textarea id="codeArea" readonly placeholder="生成されたSVGコードがここに表示されます。"></textarea>
+      </section>
+
+      <section class="panel info-panel">
+        <div class="info-title">INFORMATION</div>
+        <div class="info-content" id="infoContent">
+          ファイルを選択してください。
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="status" id="status">Ready.</div>
+      </section>
     </div>
-  </section>
+  </main>
+</div>
 
-  <hr>
+<footer>VECTOR FORGE · IMAGE PROCESSING WORKSPACE</footer>
 
-  <section>
-    <div class="section-title">03 / Output Settings</div>
+<script>
+"use strict";
 
-    <div class="setting">
-      <label>出力方式</label>
-      <select id="outputMode">
-        <option value="vector">ベクター SVG</option>
-        <option value="embed">画像埋め込み SVG</option>
-      </select>
-    </div>
+/* ==========================================
+   STATE
+========================================== */
+const $ = id => document.getElementById(id);
 
-    <div class="setting">
-      <label>カラーモード</label>
-      <select id="colorMode">
-        <option value="color">フルカラー</option>
-        <option value="binary">白黒・2値</option>
-      </select>
-    </div>
+const state = {
+  files: [],
+  selectedId: null,
+  results: new Map(),
+  previewMode: "original",
+  busy: false,
+  cancelled: false,
+  previewToken: 0,
+  tracerPromise: null
+};
 
-    <div class="setting">
-      <label>スケール <span id="scaleValue">1.0x</span></label>
-      <input type="range" id="scale" min="0.25" max="4" step="0.25" value="1">
-    </div>
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
 
-    <div class="setting">
-      <label>単純化 <span id="simplifyValue">1.0</span></label>
-      <input type="range" id="simplify" min="0.1" max="5" step="0.1" value="1">
-    </div>
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1024 / 1024).toFixed(2) + " MB";
+}
 
-    <div class="setting">
-      <label>スムージング <span id="smoothValue">1</span></label>
-      <input type="range" id="smooth" min="0" max="5" step="1" value="1">
-    </div>
+function setStatus(message, type = "") {
+  $("status").textContent = message;
+  $("status").className = "status " + type;
+}
 
-    <div class="setting">
-      <label>最大処理サイズ</label>
-      <select id="maxSize">
-        <option value="2">2 MP（軽量）</option>
-        <option value="4">4 MP</option>
-        <option value="8" selected>8 MP（標準）</option>
-        <option value="12">12 MP（高負荷）</option>
-      </select>
-    </div>
-  </section>
+function setProgress(value) {
+  $("progressBar").style.width = Math.max(0, Math.min(100, value)) + "%";
+}
 
-  <hr>
+function selectedFile() {
+  return state.files.find(file => file.id === state.selectedId) || null;
+}
 
-  <section>
-    <div class="section-title">04 / Color Transparency</div>
+function selectedResult() {
+  return state.results.get(state.selectedId) || null;
+}
+
+/* ==========================================
+   FILE PICKER
+========================================== */
+
+// 専用ボタンからファイル選択を開く
+$("selectFiles").addEventListener("click", () => {
+  if (state.busy) return;
+  $("fileInput").click();
+});
+
+// ファイル選択結果を受け取る
+$("fileInput").addEventListener("change", event => {
+  const selected = Array.from(event.target.files || []);
+
+  if (selected.length > 0) {
+    addFiles(selected);
+  }
+
+  // 同じファイルを再度選択できるようにする
+  event.target.value = "";
+});
+
+// ドラッグ＆ドロップ
+const dropzone = $("dropzone");
+
+dropzone.addEventListener("dragover", event => {
+  event.preventDefault();
+  if (!state.busy) dropzone.classList.add("drag");
+});
+
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("drag");
+});
+
+dropzone.addEventListener("drop", event => {
+  event.preventDefault();
+  dropzone.classList.remove("drag");
+
+  if (state.busy) return;
+
+  const dropped = Array.from(event.dataTransfer?.files || []);
+  if (dropped.length) addFiles(dropped);
+});
+
+/* ==========================================
+   FILE MANAGEMENT
+========================================== */
+function addFiles(files) {
+  let added = 0;
+
+  for (const file of files) {
+    const isImage =
+      file.type.startsWith("image/") ||
+      /\.(png|jpe?g|webp|bmp|gif)$/i.test(file.name);
+
+    if (!isImage) {
+      setStatus(file.name + " は画像ファイルではありません。", "error");
+      continue;
+    }
+
+    if (file.size > 25 * 1024 * 1024) {
+      setStatus(file.name + " は25MBを超えています。", "error");
+      continue;
+    }
+
+    if (state.files.length >= 30) {
+      setStatus("一度に読み込める画像は30個までです。", "error");
+      break;
+    }
+
+    // Fileオブジェクトをそのまま保持する
+    const entry = {
+      id: uid(),
+      file: file,
+      name: file.name,
+      url: URL.createObjectURL(file),
+      width: 0,
+      height: 0,
+      size: file.size
+    };
+
+    state.files.push(entry);
+    added++;
+
+    // 読み込み確認と画像サイズ取得
+    const image = new Image();
+
+    image.onload = () => {
+      entry.width = image.naturalWidth;
+      entry.height = image.naturalHeight;
+
+      renderFileList();
+
+      if (state.selectedId === entry.id) {
+        renderPreview();
+      }
+    };
+
+    image.onerror = () => {
+      setStatus("画像を読み込めませんでした: " + entry.name, "error");
+    };
+
+    image.src = entry.url;
+
+    // 最初のファイルを自動選択
+    if (!state.selectedId) {
+      state.selectedId = entry.id;
+    }
+  }
+
+  renderFileList();
+  renderPreview();
+  updateButtons();
+
+  if (added > 0) {
+    setStatus(added + "個の画像をシステムに登録しました。", "success");
+  }
+}
+
+function removeFile(id) {
+  const index = state.files.findIndex(file => file.id === id);
+  if (index < 0) return;
+
+  const entry = state.files[index];
+
+  URL.revokeObjectURL(entry.url);
+  state.files.splice(index, 1);
+  state.results.delete(id);
+
+  if (state.selectedId === id) {
+    state.selectedId = state.files[0]?.id || null;
+  }
+
+  renderFileList();
+  renderPreview();
+  updateButtons();
+}
+
+function renderFileList() {
+  const root = $("fileList");
+  $("fileCount").textContent = state.files.length;
+
+  root.replaceChildren();
+
+  if (!state.files.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.textContent = "画像がありません";
+    root.append(empty);
+    return;
+  }
+
+  for (const entry of state.files) {
+    const item = document.createElement("div");
+
+    item.className = "file-item" +
+      (entry.id === state.selectedId ? " active" : "");
+
+    item.addEventListener("click", () => {
+      state.selectedId = entry.id;
+      renderFileList();
+      renderPreview();
+      updateButtons();
+    });
+
+    const icon = document.createElement("span");
+    icon.className = "file-icon";
+    icon.textContent = "▧";
+
+    const name = document.createElement("span");
+    name.className = "file-name";
+    name.textContent = entry.name;
+    name.title = entry.name;
+
+    const status = document.createElement("span");
+    status.className = "file-status";
+    status.textContent = state.results.has(entry.id) ? "DONE" : "READY";
+
+    const remove = document.createElement("button");
+    remove.className = "remove-file";
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.title = "削除";
+
+    remove.addEventListener("click", event => {
+      event.stopPropagation();
+      removeFile(entry.id);
+    });
+
+    item.append(icon, name, status, remove);
+    root.append(item);
+  }
+}
+
+/* ==========================================
+   PREVIEW
+========================================== */
+function showEmptyPreview(message) {
+  state.previewToken++;
+
+  const empty = document.createElement("div");
+  empty.className = "empty-state";
+  empty.textContent = message;
+
+  $("previewStage").replaceChildren(empty);
+}
+
+function renderPreview() {
+  const entry = selectedFile();
+
+  if (!entry) {
+    showEmptyPreview("画像を読み込んでください。");
+    $("previewName").textContent = "NO FILE SELECTED";
+    $("previewFormat").textContent = "WAITING";
+    $("codeArea").value = "";
+    $("infoContent").textContent = "ファイルを選択してください。";
+    return;
+  }
+
+  $("previewName").textContent = entry.name;
+
+  if (state.previewMode === "output") {
+    const result = selectedResult();
+
+    if (result) {
+      $("previewFormat").textContent = "SVG OUTPUT";
+      $("codeArea").value = result.svg;
+
+      $("infoContent").textContent =
+        "出力サイズ: " + formatBytes(result.blob.size) +
+        " / 画像: " + result.width + " × " + result.height +
+        " / 透過ピクセル: " + result.removedPixels;
+
+      setPreviewSVG(result.svg);
+      return;
+    }
+  }
+
+  $("previewFormat").textContent = "ORIGINAL IMAGE";
+  $("codeArea").value = selectedResult()?.svg || ""Color Transparency</div>
 
     <div class="setting">
       <div class="check-row">
