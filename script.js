@@ -2856,3 +2856,125 @@ function initializeEventListeners() {
     initializeFileListEvents();
     initializeKeyboardShortcuts();
 }
+/* =========================================
+   ENGINE STATUS
+========================================= */
+
+function checkEngineAvailability() {
+    const tracerAvailable =
+        typeof Worker !== "undefined" &&
+        typeof Blob !== "undefined" &&
+        typeof URL.createObjectURL === "function";
+
+    const zipAvailable =
+        typeof JSZip !== "undefined";
+
+    if (!tracerAvailable) {
+        showToast(
+            "Your browser does not support the conversion engine.",
+            "error",
+            6000
+        );
+
+        return false;
+    }
+
+    if (!zipAvailable) {
+        showToast(
+            "ZIP export is unavailable. Other features can still work.",
+            "warning",
+            5000
+        );
+    }
+
+    return true;
+}
+
+/* =========================================
+   INITIAL UI STATE
+========================================= */
+
+function initializeDefaultUI() {
+    state.files = [];
+    state.results = [];
+    state.activeId = null;
+    state.busy = false;
+    state.cancelled = false;
+    state.currentIndex = 0;
+    state.totalCount = 0;
+    state.activeTab = "original";
+    state.zoom = 1;
+
+    updateFileSummary();
+    updateSettingsLabels();
+    updateExportButtons();
+
+    showEmptyPreview();
+
+    if (DOM.progressFill) {
+        DOM.progressFill.style.width = "0%";
+    }
+
+    if (DOM.progressPercent) {
+        DOM.progressPercent.textContent = "0%";
+    }
+
+    if (DOM.progressMessage) {
+        DOM.progressMessage.textContent = "Ready";
+    }
+
+    if (DOM.convertBtn) {
+        DOM.convertBtn.disabled = true;
+    }
+
+    if (DOM.cancelBtn) {
+        DOM.cancelBtn.hidden = true;
+    }
+}
+
+/* =========================================
+   STARTUP
+========================================= */
+
+function initializeApplication() {
+    try {
+        installErrorHandlers();
+
+        initializeDefaultUI();
+
+        initializeEventListeners();
+
+        checkEngineAvailability();
+
+        captureConversionSettings();
+
+        console.info(
+            `${APP_CONFIG.name} ${APP_CONFIG.version} initialized.`
+        );
+
+        showToast(
+            `${APP_CONFIG.name} ${APP_CONFIG.version} ready.`,
+            "success"
+        );
+
+    } catch (error) {
+        handleApplicationError(
+            error,
+            "Initialization failed"
+        );
+    }
+}
+
+/* =========================================
+   DOM READY
+========================================= */
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeApplication,
+        { once: true }
+    );
+} else {
+    initializeApplication();
+}
