@@ -1354,3 +1354,414 @@ input[type="range"]::-moz-range-thumb {
     align-items: center;
     gap: 8px;
 }
+/* =========================================
+   PROGRESS PANEL
+========================================= */
+
+.progress-panel {
+    display: none;
+    padding: 18px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-panel);
+}
+
+.progress-panel.visible {
+    display: block;
+    animation: fadeIn 0.25s ease;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.progress-message {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.progress-percent {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), #79e7f5);
+    transition: width 0.2s ease;
+}
+
+.progress-details {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+/* =========================================
+   EXPORT PANEL
+========================================= */
+
+.export-panel {
+    padding: 18px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-panel);
+}
+
+.export-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.export-title {
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.export-info {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.export-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.export-button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.export-button.primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #071419;
+}
+
+.export-button.primary:hover:not(:disabled) {
+    background: #79e7f5;
+    color: #071419;
+}
+
+.export-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   WORKSPACE FOOTER
+========================================= */
+
+.workspace-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.footer-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.footer-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+}
+
+/* =========================================
+   TOAST NOTIFICATIONS
+========================================= */
+
+.toast-region {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 220px;
+    max-width: 360px;
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    box-shadow: var(--shadow);
+    font-size: 12px;
+    animation: toastIn 0.25s ease both;
+}
+
+.toast.success {
+    border-left: 3px solid var(--success);
+}
+
+.toast.error {
+    border-left: 3px solid var(--danger);
+}
+
+.toast.warning {
+    border-left: 3px solid var(--warning);
+}
+
+.toast.removing {
+    animation: toastOut 0.2s ease both;
+}
+
+/* =========================================
+   SCROLLBARS
+========================================= */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #3b4553 transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #3b4553;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #586577;
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(16px);
+    }
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+    .main-layout {
+        grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    .settings-panel {
+        padding: 16px;
+    }
+
+    .preview-tabs {
+        gap: 2px;
+    }
+
+    .preview-tab {
+        padding: 7px 9px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 760px) {
+    .app-shell {
+        padding: 12px;
+    }
+
+    .topbar {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-stage {
+        min-height: 340px;
+    }
+
+    .settings-panel {
+        order: 2;
+    }
+
+    .workspace-panel {
+        order: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-shell {
+        padding: 8px;
+    }
+
+    .topbar {
+        padding: 12px;
+    }
+
+    .brand-title {
+        font-size: 16px;
+    }
+
+    .preview-toolbar {
+        flex-wrap: wrap;
+        padding: 10px;
+    }
+
+    .preview-tabs {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .preview-tab {
+        flex: 1;
+        padding: 8px 4px;
+        font-size: 9px;
+    }
+
+    .preview-tools {
+        margin-left: auto;
+    }
+
+    .preview-stage {
+        min-height: 260px;
+    }
+
+    .preview-content {
+        padding: 12px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .export-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .export-button {
+        padding: 0 8px;
+        font-size: 10px;
+    }
+
+    .workspace-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .toast-region {
+        right: 10px;
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        max-width: none;
+        width: 100%;
+    }
+}
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* =========================================
+   END OF STYLESHEET
+========================================= */
