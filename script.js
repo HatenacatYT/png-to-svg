@@ -2559,3 +2559,300 @@ function quickSaveActiveResult() {
 function saveAllResultsAsZip() {
     exportZip();
                }
+/* =========================================
+   EVENT HELPERS
+========================================= */
+
+function bindEvent(element, eventName, callback) {
+    if (!element) {
+        return;
+    }
+
+    element.addEventListener(eventName, callback);
+}
+
+function bindClick(element, callback) {
+    bindEvent(element, "click", event => {
+        event.preventDefault();
+        callback(event);
+    });
+}
+
+function bindInput(element, callback) {
+    bindEvent(element, "input", event => {
+        callback(event.target.value, event);
+    });
+}
+
+/* =========================================
+   FILE INPUT
+========================================= */
+
+function initializeFileInput() {
+    bindEvent(DOM.fileInput, "change", async event => {
+        const files = Array.from(event.target.files || []);
+
+        if (files.length > 0) {
+            await importFiles(files);
+        }
+
+        event.target.value = "";
+    });
+}
+
+/* =========================================
+   DRAG AND DROP
+========================================= */
+
+function initializeDragAndDrop() {
+    const dropZone = DOM.dropZone;
+
+    if (!dropZone) {
+        return;
+    }
+
+    const preventDefaults = event => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    ["dragenter", "dragover", "dragleave", "drop"].forEach(name => {
+        bindEvent(dropZone, name, preventDefaults);
+    });
+
+    ["dragenter", "dragover"].forEach(name => {
+        bindEvent(dropZone, name, () => {
+            dropZone.classList.add("drag-over");
+        });
+    });
+
+    ["dragleave", "drop"].forEach(name => {
+        bindEvent(dropZone, name, () => {
+            dropZone.classList.remove("drag-over");
+        });
+    });
+
+    bindEvent(dropZone, "drop", async event => {
+        if (state.busy) {
+            return;
+        }
+
+        const files = Array.from(
+            event.dataTransfer?.files || []
+        );
+
+        if (files.length > 0) {
+            await importFiles(files);
+        }
+    });
+}
+
+/* =========================================
+   MAIN BUTTONS
+========================================= */
+
+function initializeMainButtons() {
+    bindClick(DOM.addFilesBtn, () => {
+        DOM.fileInput?.click();
+    });
+
+    bindClick(DOM.clearBtn, () => {
+        clearAllFiles();
+    });
+
+    bindClick(DOM.convertBtn, () => {
+        startConversion();
+    });
+
+    bindClick(DOM.cancelBtn, () => {
+        cancelConversion();
+    });
+
+    bindClick(DOM.zipBtn, () => {
+        exportZip();
+    });
+}
+
+/* =========================================
+   EXPORT BUTTONS
+========================================= */
+
+function initializeExportButtons() {
+    bindClick(DOM.saveSvgBtn, () => {
+        saveSvgResult(state.activeId);
+    });
+
+    bindClick(DOM.savePngBtn, () => {
+        savePngResult(state.activeId);
+    });
+
+    bindClick(DOM.copyCodeBtn, () => {
+        copySvgCode(state.activeId);
+    });
+}
+
+/* =========================================
+   PREVIEW TABS
+========================================= */
+
+function initializePreviewTabs() {
+    bindClick(DOM.tabOriginal, showOriginalTab);
+    bindClick(DOM.tabOutput, showOutputTab);
+    bindClick(DOM.tabCode, showCodeTab);
+    bindClick(DOM.tabInfo, showInfoTab);
+}
+
+/* =========================================
+   ZOOM BUTTONS
+========================================= */
+
+function initializeZoomButtons() {
+    bindClick(DOM.zoomInBtn, () => {
+        changeZoom(1);
+    });
+
+    bindClick(DOM.zoomOutBtn, () => {
+        changeZoom(-1);
+    });
+
+    bindClick(DOM.zoomResetBtn, () => {
+        resetZoom();
+    });
+
+    bindClick(DOM.zoomFitBtn, () => {
+        fitPreview();
+    });
+}
+
+/* =========================================
+   SETTINGS INPUTS
+========================================= */
+
+function initializeSettingsInputs() {
+    const settingElements = [
+        DOM.colorCount,
+        DOM.scale,
+        DOM.pathSimplification,
+        DOM.smoothing,
+        DOM.alphaThreshold,
+        DOM.maxDimension,
+        DOM.edgeSmoothing
+    ];
+
+    settingElements.forEach(element => {
+        bindInput(element, () => {
+            updateSettingsLabels();
+        });
+
+        bindEvent(element, "change", () => {
+            captureConversionSettings();
+        });
+    });
+
+    const checkboxElements = [
+        DOM.removeWhiteBackground,
+        DOM.preserveAlpha,
+        DOM.layering,
+        DOM.optimizeSvg
+    ];
+
+    checkboxElements.forEach(element => {
+        bindEvent(element, "change", () => {
+            captureConversionSettings();
+        });
+    });
+
+    bindEvent(DOM.modeSelect, "change", () => {
+        captureConversionSettings();
+    });
+}
+
+/* =========================================
+   FILE LIST INTERACTION
+========================================= */
+
+function initializeFileListEvents() {
+    bindEvent(DOM.fileList, "click", event => {
+        const removeButton = event.target.closest(
+            "[data-remove-file]"
+        );
+
+        if (removeButton) {
+            event.stopPropagation();
+
+            const id = removeButton.dataset.removeFile;
+
+            if (id) {
+                removeFile(id);
+            }
+
+            return;
+        }
+
+        const fileItem = event.target.closest(
+            "[data-file-id]"
+        );
+
+        if (fileItem) {
+            selectFile(fileItem.dataset.fileId);
+        }
+    });
+}
+
+/* =========================================
+   KEYBOARD SHORTCUTS
+========================================= */
+
+function initializeKeyboardShortcuts() {
+    bindEvent(document, "keydown", event => {
+        const target = event.target;
+
+        const isEditing =
+            target instanceof HTMLInputElement ||
+            target instanceof HTMLTextAreaElement ||
+            target instanceof HTMLSelectElement ||
+            target?.isContentEditable;
+
+        if (isEditing) {
+            return;
+        }
+
+        if (event.ctrlKey && event.key.toLowerCase() === "o") {
+            event.preventDefault();
+            DOM.fileInput?.click();
+        }
+
+        if (
+            event.ctrlKey &&
+            event.key.toLowerCase() === "s"
+        ) {
+            event.preventDefault();
+            quickSaveActiveResult();
+        }
+
+        if (
+            event.key === "Escape" &&
+            state.busy
+        ) {
+            cancelConversion();
+        }
+    });
+}
+
+/* =========================================
+   APPLICATION EVENTS
+========================================= */
+
+function initializeEventListeners() {
+    initializeFileInput();
+    initializeDragAndDrop();
+
+    initializeMainButtons();
+    initializeExportButtons();
+    initializePreviewTabs();
+    initializeZoomButtons();
+
+    initializeSettingsInputs();
+    initializeFileListEvents();
+    initializeKeyboardShortcuts();
+}
