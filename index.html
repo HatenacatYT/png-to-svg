@@ -1,227 +1,681 @@
 <!DOCTYPE html>
-<html lang="ja" class="dark">
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VECTOR FORGE — 高性能画像・SVG変換ツール</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#e0f7fa',
-              100: '#b2ebf2',
-              400: '#26c6da',
-              500: '#00bcd4',
-              600: '#00acc1',
-              accent: '#00f0ff',
-              dark: '#0a0f1d',
-              card: '#121929',
-              border: '#1e293b'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'SF Pro JP', 'Segoe UI', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- JSZip (Fallback available in code) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <style>
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0a0f1d;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1e293b;
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #00acc1;
-    }
-
-    /* Glassmorphism */
-    .glass-panel {
-      background: rgba(18, 25, 41, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .glass-panel-interactive {
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .glass-panel-interactive:hover {
-      border-color: rgba(0, 240, 255, 0.4);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
-    }
-
-    /* Checkered pattern for transparent backgrounds */
-    .bg-checkerboard {
-      background-color: #1a202c;
-      background-image: 
-        linear-gradient(45deg, #2d3748 25%, transparent 25%), 
-        linear-gradient(-45deg, #2d3748 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #2d3748 75%), 
-        linear-gradient(-45deg, transparent 75%, #2d3748 75%);
-      background-size: 16px 16px;
-      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-    }
-
-    /* Custom range styling */
-    input[type=range] {
-      accent-color: #00f0ff;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101116">
+<title>VECTOR FORGE — Image to SVG Studio</title>
+<style>
+:root{
+  --bg:#101116;
+  --panel:#181a22;
+  --panel2:#20232d;
+  --border:#303440;
+  --text:#f2f3f7;
+  --muted:#9299a8;
+  --accent:#8b7cff;
+  --accent2:#45d9c1;
+  --danger:#ff657b;
+  --radius:13px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:14px;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+.app{min-height:100vh;display:flex;flex-direction:column}
+header{
+  height:64px;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  background:#14151c;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:34px;height:34px;border-radius:10px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#8c7aff,#4bd9c3);
+  color:#101116;font-size:19px;font-weight:900;
+}
+.brand-name{font-weight:800;letter-spacing:1.3px}
+.brand-sub{font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.status{font-size:11px;color:var(--muted)}
+.status-dot{display:inline-block;width:7px;height:7px;background:#4bd9a8;border-radius:50%;margin-right:6px}
+main{
+  width:min(1500px,100%);
+  margin:0 auto;
+  padding:22px;
+  display:grid;
+  grid-template-columns:290px minmax(0,1fr);
+  gap:20px;
+  flex:1;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.sidebar{display:flex;flex-direction:column;gap:14px}
+.panel-heading{
+  padding:15px 16px;
+  border-bottom:1px solid var(--border);
+  font-weight:750;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.panel-body{padding:16px}
+.section-label{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1.2px;
+  font-weight:800;
+  text-transform:uppercase;
+  margin:4px 0 12px;
+}
+.dropzone{
+  border:1px dashed #555d70;
+  border-radius:12px;
+  min-height:145px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:16px;
+  background:#1c1e28;
+  transition:.2s;
+  cursor:pointer;
+}
+.dropzone:hover,.dropzone.dragover{
+  border-color:var(--accent);
+  background:#242238;
+}
+.drop-icon{font-size:30px;margin-bottom:8px}
+.drop-title{font-weight:750}
+.drop-sub{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.6}
+.file-list{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.file-item{
+  padding:9px 10px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+  background:#1b1d26;
+}
+.file-item.active{border-color:var(--accent);background:#242238}
+.file-thumb{
+  width:34px;height:34px;object-fit:cover;
+  border-radius:5px;background:#292c37;
+}
+.file-info{min-width:0;flex:1}
+.file-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-meta{font-size:10px;color:var(--muted);margin-top:3px}
+.icon-btn{
+  background:transparent;border:0;color:var(--muted);
+  padding:5px;border-radius:5px;
+}
+.icon-btn:hover{background:#343744;color:white}
+.control{margin-bottom:17px}
+.control:last-child{margin-bottom:0}
+.control-head{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:8px;
+}
+.control label{font-size:12px;font-weight:650}
+.value{color:var(--accent2);font-size:11px;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select,input[type=number]{
+  width:100%;padding:9px 10px;
+  background:#11131a;color:var(--text);
+  border:1px solid var(--border);border-radius:7px;
+  outline:none;
+}
+select:focus,input:focus{border-color:var(--accent)}
+.toggle-row{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:12px;margin:12px 0;
+}
+.toggle-row span{font-size:12px}
+.toggle{
+  appearance:none;width:35px;height:19px;
+  background:#454957;border-radius:20px;
+  position:relative;cursor:pointer;flex-shrink:0;
+}
+.toggle:before{
+  content:"";position:absolute;left:3px;top:3px;
+  width:13px;height:13px;background:white;border-radius:50%;
+  transition:.2s;
+}
+.toggle:checked{background:var(--accent)}
+.toggle:checked:before{left:19px}
+.btn{
+  border:1px solid var(--border);
+  color:var(--text);
+  background:#292c37;
+  padding:9px 12px;
+  border-radius:8px;
+  font-weight:700;
+  font-size:12px;
+  transition:.15s;
+}
+.btn:hover{filter:brightness(1.2)}
+.btn.primary{
+  background:linear-gradient(110deg,#8979ff,#6d61e8);
+  border-color:transparent;color:white;
+}
+.btn.secondary{
+  background:#202e32;border-color:#31514f;color:#72e4cf;
+}
+.btn.danger{color:#ff8294}
+.btn.full{width:100%}
+.btn-row{display:flex;gap:8px}
+.btn-row>*{flex:1}
+.workspace{min-width:0;display:flex;flex-direction:column;gap:14px}
+.toolbar{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:10px;flex-wrap:wrap;
+}
+.tabs{display:flex;gap:6px}
+.tab{
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);padding:9px 13px;border-radius:8px;
+  font-size:12px;font-weight:700;
+}
+.tab.active{background:#28243e;color:#c0b7ff;border-color:#6558a6}
+.preview-panel{min-height:430px;display:flex;flex-direction:column}
+.preview-head{
+  padding:13px 16px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.preview-stage{
+  flex:1;min-height:370px;padding:18px;
+  display:grid;place-items:center;
+  background-color:#171922;
+  background-image:
+    linear-gradient(45deg,#20232c 25%,transparent 25%),
+    linear-gradient(-45deg,#20232c 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#20232c 75%),
+    linear-gradient(-45deg,transparent 75%,#20232c 75%);
+  background-size:22px 22px;
+  background-position:0 0,0 11px,11px -11px,-11px 0;
+}
+.preview-stage img,.preview-stage svg{
+  max-width:100%;max-height:540px;
+  object-fit:contain;
+  box-shadow:0 10px 40px #0007;
+}
+.preview-stage .empty{
+  text-align:center;color:var(--muted);line-height:1.8;
+}
+.empty-icon{font-size:42px;margin-bottom:10px}
+.preview-footer{
+  padding:10px 15px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;
+  gap:10px;flex-wrap:wrap;color:var(--muted);font-size:11px;
+}
+.result-panel{display:flex;flex-direction:column}
+.result-tabs{display:flex;gap:5px}
+.result-tabs button{
+  border:0;background:transparent;color:var(--muted);
+  padding:7px 10px;border-radius:6px;font-size:11px;
+}
+.result-tabs button.active{background:#303044;color:white}
+.code-area{
+  width:100%;height:230px;resize:vertical;
+  border:0;outline:none;padding:14px;
+  background:#11131a;color:#b9d6ca;
+  font:11px/1.6 "Cascadia Code",Consolas,monospace;
+}
+.result-empty{padding:25px;color:var(--muted);text-align:center}
+.progress-wrap{height:4px;background:#292c36;overflow:hidden}
+.progress-bar{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .15s;
+}
+footer{
+  border-top:1px solid var(--border);
+  padding:14px 22px;color:var(--muted);
+  font-size:10px;display:flex;justify-content:space-between;
+}
+.toast{
+  position:fixed;bottom:22px;right:22px;
+  background:#292d39;border:1px solid #4b5263;
+  color:white;padding:12px 16px;border-radius:9px;
+  box-shadow:0 10px 30px #0008;
+  opacity:0;transform:translateY(10px);
+  pointer-events:none;transition:.2s;z-index:100;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.hidden{display:none!important}
+input[type=file]{display:none}
+@media(max-width:900px){
+  main{grid-template-columns:1fr;padding:13px}
+  .sidebar{display:grid;grid-template-columns:1fr 1fr}
+  .sidebar .settings-panel{grid-column:1/-1}
+}
+@media(max-width:600px){
+  header{padding:0 13px;height:58px}
+  .status{display:none}
+  main{padding:10px;gap:12px}
+  .sidebar{display:flex}
+  .preview-panel{min-height:340px}
+  .preview-stage{min-height:280px;padding:10px}
+  .toolbar{align-items:stretch}
+  .toolbar .btn-row{width:100%}
+  .toolbar .tabs{width:100%}
+  .toolbar .tab{flex:1}
+  footer{padding:12px;gap:8px;flex-wrap:wrap}
+}
+</style>
 </head>
-<body class="bg-brand-dark text-slate-100 font-sans antialiased min-h-screen flex flex-col overflow-x-hidden select-none">
+<body>
+<div class="app">
+<header>
+  <div class="brand">
+    <div class="logo">V</div>
+    <div>
+      <div class="brand-name">VECTOR FORGE</div>
+      <div class="brand-sub">IMAGE TO SVG STUDIO</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="status"><i class="status-dot"></i>LOCAL PROCESSING</span>
+    <button class="btn" id="clearAll">リセット</button>
+  </div>
+</header>
 
-  <!-- Toast Notification Container -->
-  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+<main>
+  <aside class="sidebar">
+    <section class="panel">
+      <div class="panel-heading">
+        <span>画像ファイル</span>
+        <span id="fileCount" class="value">0 FILES</span>
+      </div>
+      <div class="panel-body">
+        <label class="dropzone" id="dropzone" for="fileInput">
+          <div class="drop-icon">↥</div>
+          <div class="drop-title">画像を追加</div>
+          <div class="drop-sub">クリックまたはドラッグ＆ドロップ<br>PNG / JPG / WEBP / BMP / GIF</div>
+        </label>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/bmp,image/gif" multiple>
+        <div class="file-list" id="fileList"></div>
+      </div>
+    </section>
 
-  <!-- HEADER -->
-  <header class="h-16 border-b border-brand-border glass-panel sticky top-0 z-40 px-4 lg:px-8 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <button id="mobile-menu-toggle" class="lg:hidden p-2 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800">
-        <i data-lucide="menu" class="w-6 h-6"></i>
-      </button>
-      <div class="flex items-center gap-2">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-500 to-brand-accent flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-brand-500/20">
-          <i data-lucide="layers" class="w-5 h-5"></i>
+    <section class="panel settings-panel">
+      <div class="panel-heading">変換設定</div>
+      <div class="panel-body">
+        <div class="control">
+          <div class="control-head">
+            <label for="mode">出力方式</label>
+          </div>
+          <select id="mode">
+            <option value="vector">ベクター化 SVG</option>
+            <option value="embed">画像埋め込み SVG</option>
+          </select>
         </div>
-        <div>
-          <h1 class="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-brand-accent">
-            VECTOR FORGE
-          </h1>
-          <span class="text-[10px] text-slate-400 font-mono -mt-1 block">v2.4 PRO VECTOR ENGINE</span>
+
+        <div id="vectorSettings">
+          <div class="control">
+            <div class="control-head">
+              <label for="colors">色数</label>
+              <span class="value" id="colorsValue">16</span>
+            </div>
+            <input type="range" id="colors" min="2" max="64" value="16">
+          </div>
+          <div class="control">
+            <div class="control-head">
+              <label for="scale">処理解像度</label>
+              <span class="value" id="scaleValue">100%</span>
+            </div>
+            <input type="range" id="scale" min="10" max="100" step="5" value="100">
+          </div>
+          <div class="control">
+            <div class="control-head">
+              <label for="simplify">輪郭の簡略化</label>
+              <span class="value" id="simplifyValue">1.5</span>
+            </div>
+            <input type="range" id="simplify" min="0" max="5" step=".1" value="1.5">
+          </div>
+          <div class="control">
+            <div class="control-head">
+              <label for="threshold">透明度しきい値</label>
+              <span class="value" id="thresholdValue">20</span>
+            </div>
+            <input type="range" id="threshold" min="0" max="250" value="20">
+          </div>
+          <div class="toggle-row">
+            <span>アンチエイリアス処理</span>
+            <input class="toggle" type="checkbox" id="smooth" checked>
+          </div>
+          <div class="toggle-row">
+            <span>背景を白として処理</span>
+            <input class="toggle" type="checkbox" id="whiteBg">
+          </div>
         </div>
+
+        <div class="control">
+          <div class="control-head"><label for="maxSize">最大出力サイズ</label></div>
+          <select id="maxSize">
+            <option value="2048">2048 px</option>
+            <option value="4096" selected>4096 px</option>
+            <option value="8192">8192 px</option>
+          </select>
+        </div>
+        <button class="btn primary full" id="convertBtn" disabled>✦ SVGに変換</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">エクスポート</div>
+      <div class="panel-body">
+        <div class="btn-row">
+          <button class="btn secondary" id="saveBtn" disabled>SVG保存</button>
+          <button class="btn" id="zipBtn" disabled>ZIP保存</button>
+        </div>
+        <div style="height:8px"></div>
+        <button class="btn full" id="copyBtn" disabled>SVGコードをコピー</button>
+      </div>
+    </section>
+  </aside>
+
+  <section class="workspace">
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab active" id="originalTab">ORIGINAL</button>
+        <button class="tab" id="outputTab">SVG OUTPUT</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="fitBtn">表示をリセット</button>
+        <button class="btn primary" id="quickSave" disabled>ダウンロード ↓</button>
       </div>
     </div>
 
-    <!-- Actions Right -->
-    <div class="flex items-center gap-3">
-      <a href="#about-modal" id="btn-app-info" class="text-xs text-slate-400 hover:text-brand-accent flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 transition">
-        <i data-lucide="info" class="w-4 h-4"></i>
-        <span class="hidden sm:inline">アプリ情報</span>
-      </a>
-      <button id="btn-batch-download" disabled class="opacity-50 cursor-not-allowed bg-gradient-to-r from-brand-600 to-brand-500 text-slate-950 font-semibold px-4 py-1.5 rounded-lg text-sm flex items-center gap-2 hover:shadow-lg hover:shadow-brand-500/25 transition">
-        <i data-lucide="archive" class="w-4 h-4"></i>
-        <span>ZIP一括保存</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- MAIN WRAPPER -->
-  <div class="flex-1 flex relative overflow-hidden">
-
-    <!-- SIDEBAR NAVIGATION -->
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-brand-dark/95 border-r border-brand-border transition-transform duration-300 -translate-x-full lg:translate-x-0 flex flex-col justify-between p-4">
-      <div class="space-y-6">
-        <div>
-          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-2">メインメニュー</div>
-          <nav class="space-y-1">
-            <button data-tab="converter" class="nav-tab active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition bg-slate-800/80 text-brand-accent border border-brand-accent/20">
-              <i data-lucide="wand-2" class="w-4 h-4"></i>
-              <span>変換ワークスペース</span>
-            </button>
-            <button data-tab="files" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
-              <i data-lucide="files" class="w-4 h-4"></i>
-              <span>読み込みファイル</span>
-              <span id="sidebar-file-count" class="ml-auto bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full">0</span>
-            </button>
-            <button data-tab="history" class="nav-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
-              <i data-lucide="history" class="w-4 h-4"></i>
-              <span>変換履歴</span>
-            </button>
-          </nav>
-        </div>
-
-        <div>
-          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-2">変換方式</div>
-          <div class="space-y-2 px-1">
-            <label class="flex items-start gap-3 p-2.5 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition bg-slate-900/40">
-              <input type="radio" name="engineMode" value="vector" checked class="mt-1 text-brand-accent focus:ring-brand-accent bg-slate-900 border-slate-700">
-              <div>
-                <div class="text-xs font-semibold text-slate-200">本格ベクター化</div>
-                <div class="text-[11px] text-slate-400 leading-tight mt-0.5">色領域抽出とパス輪郭追跡（Marching Squares）</div>
-              </div>
-            </label>
-            <label class="flex items-start gap-3 p-2.5 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition bg-slate-900/40">
-              <input type="radio" name="engineMode" value="embed" class="mt-1 text-brand-accent focus:ring-brand-accent bg-slate-900 border-slate-700">
-              <div>
-                <div class="text-xs font-semibold text-slate-200">SVG画像埋め込み</div>
-                <div class="text-[11px] text-slate-400 leading-tight mt-0.5">高画質Base64 URIラップ（非パス化）</div>
-              </div>
-            </label>
-          </div>
+    <section class="panel preview-panel">
+      <div class="preview-head">
+        <strong id="previewTitle">プレビュー</strong>
+        <span class="value" id="previewFormat">NO IMAGE</span>
+      </div>
+      <div class="preview-stage" id="previewStage">
+        <div class="empty">
+          <div class="empty-icon">◈</div>
+          <strong>VECTOR FORGE</strong><br>
+          画像を追加すると、ここにプレビューが表示されます。
         </div>
       </div>
+      <div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+      <div class="preview-footer">
+        <span id="imageDimensions">画像未選択</span>
+        <span id="outputInfo">出力待機中</span>
+      </div>
+    </section>
 
-      <div class="pt-4 border-t border-brand-border">
-        <div class="glass-panel p-3 rounded-xl text-xs space-y-2">
-          <div class="flex items-center justify-between text-slate-400">
-            <span>ステータス:</span>
-            <span class="text-emerald-400 flex items-center gap-1 font-mono">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> READY
-            </span>
-          </div>
-          <div class="text-[11px] text-slate-500">クライアントサイド完全ローカル処理（外部送信なし）</div>
+    <section class="panel result-panel">
+      <div class="panel-heading">
+        <span>SVG SOURCE</span>
+        <div class="result-tabs">
+          <button class="active" id="codeTab">CODE</button>
+          <button id="infoTab">INFO</button>
         </div>
       </div>
-    </aside>
+      <textarea id="codeArea" class="code-area" spellcheck="false"
+        placeholder="変換後のSVGコードがここに表示されます。" readonly></textarea>
+      <div id="infoArea" class="result-empty hidden">
+        まだ変換結果がありません。
+      </div>
+    </section>
+  </section>
+</main>
 
-    <!-- SIDEBAR OVERLAY FOR MOBILE -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-950/80 z-20 hidden lg:hidden backdrop-blur-sm"></div>
+<footer>
+  <span>VECTOR FORGE · CLIENT-SIDE SVG CONVERTER</span>
+  <span>Files are processed locally in your browser.</span>
+</footer>
+</div>
+<div class="toast" id="toast"></div>
 
-    <!-- CONTENT WORKSPACE AREA -->
-    <main class="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden p-4 lg:p-6 gap-6">
+<script>
+"use strict";
 
-      <!-- LEFT CONTROL & QUEUE PANEL -->
-      <section class="w-full lg:w-96 flex flex-col gap-5 flex-shrink-0">
+/* =========================================================
+   VECTOR FORGE
+   Single-file image to SVG application
+   ========================================================= */
 
-        <!-- DROP ZONE / UPLOADER CARD -->
-        <div class="glass-panel rounded-2xl p-4 border border-brand-border relative overflow-hidden">
-          <form id="upload-form" onsubmit="return false;">
-            <!-- FILE INPUT - STYLED SAFELY FOR ALL BROWSERS (ANDROID COMPATIBLE) -->
-            <input 
-              type="file" 
-              id="file-input" 
-              multiple 
-              accept="image/png, image/jpeg, image/jpg, image/webp, image/bmp, image/gif" 
-              class="hidden"
-            >
-            <label 
-              for="file-input" 
-              id="drop-zone"
-              class="border-2 border-dashed border-slate-700 hover:border-brand-accent/60 bg-slate-900/50 hover:bg-slate-800/40 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group"
-            >
-              <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 group-hover:border-brand-accent/40 group-hover:scale-110 flex items-center justify-center text-brand-accent mb-3 transition">
-                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
-              </div>
-              <p class="text-sm font-semibold text-slate-200 mb-1">
-                ドラッグ＆ドロップ <span class="text-slate-400 font-normal">または</span> 参照
-              </p>
-              <p class="text-[11px] text-slate-400">
-                PNG, JPEG, WebP, BMP, GIF (最大 25MB)
-              </p>
-              <button 
-                type="button" 
+const $ = id => document.getElementById(id);
+
+const state = {
+  files: [],
+  activeId: null,
+  results: new Map(),
+  previewMode: "original",
+  resultMode: "code",
+  busy: false
+};
+
+let nextId = 1;
+
+function toast(message) {
+  const el = $("toast");
+  el.textContent = message;
+  el.classList.add("show");
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1048576).toFixed(2) + " MB";
+}
+
+function safeName(name) {
+  return name.replace(/\.[^.]+$/, "")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .slice(0, 100) || "image";
+}
+
+function getActiveFile() {
+  return state.files.find(f => f.id === state.activeId) || null;
+}
+
+function getActiveResult() {
+  return state.results.get(state.activeId) || null;
+}
+
+function updateButtons() {
+  const hasFile = !!getActiveFile();
+  const hasResult = !!getActiveResult();
+  $("convertBtn").disabled = !hasFile || state.busy;
+  $("saveBtn").disabled = !hasResult || state.busy;
+  $("zipBtn").disabled = state.results.size === 0 || state.busy;
+  $("copyBtn").disabled = !hasResult;
+  $("quickSave").disabled = !hasResult;
+}
+
+function updateFileCount() {
+  $("fileCount").textContent = state.files.length + " FILES";
+}
+
+function updateSettingsLabels() {
+  $("colorsValue").textContent = $("colors").value;
+  $("scaleValue").textContent = $("scale").value + "%";
+  $("simplifyValue").textContent = Number($("simplify").value).toFixed(1);
+  $("thresholdValue").textContent = $("threshold").value;
+}
+
+["colors","scale","simplify","threshold"].forEach(id => {
+  $(id).addEventListener("input", updateSettingsLabels);
+});
+
+$("mode").addEventListener("change", () => {
+  $("vectorSettings").classList.toggle("hidden", $("mode").value !== "vector");
+});
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => resolve({img,url});
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("画像を読み込めませんでした: " + file.name));
+    };
+    img.src = url;
+  });
+}
+
+async function addFiles(fileList) {
+  const accepted = Array.from(fileList).filter(file =>
+    ["image/png","image/jpeg","image/webp","image/bmp","image/gif"].includes(file.type)
+  );
+
+  if (!accepted.length) {
+    toast("対応している画像ファイルを選択してください。");
+    return;
+  }
+
+  for (const file of accepted) {
+    try {
+      const loaded = await loadImage(file);
+      const entry = {
+        id: nextId++,
+        file,
+        img: loaded.img,
+        url: loaded.url,
+        name: file.name,
+        width: loaded.img.naturalWidth,
+        height: loaded.img.naturalHeight
+      };
+      state.files.push(entry);
+      if (!state.activeId) state.activeId = entry.id;
+    } catch (error) {
+      toast(error.message);
+    }
+  }
+
+  renderFileList();
+  renderPreview();
+  updateButtons();
+  updateFileCount();
+}
+
+function removeFile(id) {
+  const entry = state.files.find(f => f.id === id);
+  if (entry) URL.revokeObjectURL(entry.url);
+
+  state.files = state.files.filter(f => f.id !== id);
+  state.results.delete(id);
+
+  if (state.activeId === id) {
+    state.activeId = state.files[0]?.id ?? null;
+  }
+
+  renderFileList();
+  renderPreview();
+  updateFileCount();
+  updateButtons();
+}
+
+function renderFileList() {
+  const container = $("fileList");
+  container.innerHTML = "";
+
+  state.files.forEach(entry => {
+    const row = document.createElement("div");
+    row.className = "file-item" + (entry.id === state.activeId ? " active" : "");
+
+    const thumb = document.createElement("img");
+    thumb.className = "file-thumb";
+    thumb.src = entry.url;
+    thumb.alt = "";
+
+    const info = document.createElement("div");
+    info.className = "file-info";
+
+    const name = document.createElement("div");
+    name.className = "file-name";
+    name.textContent = entry.name;
+
+    const meta = document.createElement("div");
+    meta.className = "file-meta";
+    meta.textContent = `${entry.width} × ${entry.height} · ${formatBytes(entry.file.size)}`;
+
+    info.append(name, meta);
+
+    const remove = document.createElement("button");
+    remove.className = "icon-btn";
+    remove.textContent = "×";
+    remove.title = "削除";
+    remove.addEventListener("click", e => {
+      e.stopPropagation();
+      removeFile(entry.id);
+    });
+
+    row.append(thumb, info, remove);
+    row.addEventListener("click", () => {
+      state.activeId = entry.id;
+      renderFileList();
+      renderPreview();
+      updateButtons();
+    });
+
+    container.appendChild(row);
+  });
+}
+
+function renderPreview() {
+  const stage = $("previewStage");
+  const entry = getActiveFile();
+  const result = getActiveResult();
+
+  stage.innerHTML = "";
+
+  if (!entry) {
+    stage.innerHTML = `<div class="empty">
+      <div class="empty-icon">◈</div>
+      <strong>VECTOR FORGE</strong><br>
+      画像を追加すると、ここにプレビューが表示されます。
+    </div>`;
+    $("imageDimensions").textContent = "画像未選択";
+    $("previewFormat").textContent = "NO IMAGE";
+    $("outputInfo").textContent = "出力待機中";
+    return;
+  }
+
+  $("imageDimensions").textContent =
+    `${entry.width} × ${entry.height} px · ${formatBytes(entry.file.size)}`;
+
+  if (state.previewMode === "output" && result) {
+    const image = new Image();
+    image.alt = "SVG preview";
+    image.src = URL.createObjectURL(
+      new Blob([result.svg], {type:"image/svg+xml"})
+    );
+    image.onload = () => {
+      const old = image.src;
+      setTimeout(() => URL.revokeObjectURL(old), 30000);
+    };
+    stage.appendChildbutton" 
                 onclick="document.getElementById('file-input').click()" 
                 class="mt-4 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-medium rounded-lg text-slate-200 transition"
               >
