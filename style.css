@@ -1,17 +1,19 @@
-/* =========================================================
+/* =====================================================
    VECTOR FORGE 2.0.0
-   Main stylesheet
-   ========================================================= */
+   STYLE SHEET
+   PART 1 / 4
+===================================================== */
 
-/* =========================================================
-   1. ROOT
-   ========================================================= */
+/* =========================
+   1. ROOT VARIABLES
+========================= */
 
 :root {
     color-scheme: dark;
 
     --bg: #080c14;
     --bg-secondary: #0c1220;
+
     --panel: #101827;
     --panel-light: #141f31;
     --panel-hover: #19263a;
@@ -43,9 +45,9 @@
 }
 
 
-/* =========================================================
+/* =========================
    2. RESET
-   ========================================================= */
+========================= */
 
 * {
     box-sizing: border-box;
@@ -98,6 +100,11 @@ button {
     color: inherit;
 }
 
+button:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.4;
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
@@ -106,26 +113,22 @@ select:focus-visible,
     outline-offset: 3px;
 }
 
-button:disabled {
-    cursor: not-allowed !important;
-    opacity: 0.4;
-}
 
-
-/* =========================================================
+/* =========================
    3. APP SHELL
-   ========================================================= */
+========================= */
 
 .app-shell {
     width: 100%;
     min-height: 100vh;
+
     padding: 0 28px 24px;
 }
 
 
-/* =========================================================
-   4. TOPBAR
-   ========================================================= */
+/* =========================
+   4. TOP BAR
+========================= */
 
 .topbar {
     height: 82px;
@@ -172,6 +175,7 @@ button:disabled {
 
 .brand-symbol:hover {
     transform: rotate(45deg);
+
     box-shadow:
         0 0 30px rgba(0, 213, 255, 0.2);
 }
@@ -225,12 +229,14 @@ button:disabled {
 
 .status-dot.error {
     background: var(--danger);
+
     box-shadow:
         0 0 10px rgba(255, 99, 124, 0.7);
 }
 
 .status-dot.loading {
     background: var(--warning);
+
     box-shadow:
         0 0 10px rgba(255, 191, 105, 0.7);
 }
@@ -251,9 +257,9 @@ button:disabled {
 }
 
 
-/* =========================================================
+/* =========================
    5. MAIN LAYOUT
-   ========================================================= */
+========================= */
 
 .main-layout {
     display: grid;
@@ -265,6 +271,7 @@ button:disabled {
     gap: 22px;
 
     max-width: 1800px;
+
     margin: 24px auto 0;
 
     align-items: start;
@@ -289,9 +296,9 @@ button:disabled {
 }
 
 
-/* =========================================================
+/* =========================
    6. PANELS
-   ========================================================= */
+========================= */
 
 .panel,
 .preview-panel,
@@ -362,9 +369,9 @@ button:disabled {
 }
 
 
-/* =========================================================
+/* =========================
    7. DROPZONE
-   ========================================================= */
+========================= */
 
 .dropzone {
     min-height: 174px;
@@ -399,8 +406,7 @@ button:disabled {
 
 .dropzone:hover,
 .dropzone.drag-over {
-    background:
-        rgba(0, 213, 255, 0.09);
+    background: rgba(0, 213, 255, 0.09);
 
     border-color: var(--accent);
 
@@ -462,9 +468,9 @@ button:disabled {
 }
 
 
-/* =========================================================
+/* =========================
    8. FILE SUMMARY
-   ========================================================= */
+========================= */
 
 .file-summary {
     display: flex;
@@ -472,6 +478,7 @@ button:disabled {
     justify-content: space-between;
 
     min-height: 28px;
+
     margin-top: 12px;
 
     color: var(--text-muted);
@@ -509,703 +516,6 @@ button:disabled {
 }
 
 
-/* File item: created by JavaScript */
-
-.file-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    min-width: 0;
-    padding: 9px;
-
-    background: rgba(255, 255, 255, 0.025);
-
-    border: 1px solid var(--border);
-    border-radius: 9px;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-
-    animation: fadeUp 0.25s ease both;
-}
-
-.file-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(0, 213, 255, 0.2);
-}
-
-.file-item.active {
-    background: rgba(0, 213, 255, 0.07);
-    border-color: rgba(0, 213, 255, 0.4);
-}
-
-.file-thumbnail {
-    width: 38px;
-    height: 38px;
-
-    flex-shrink: 0;
-
-    object-fit: cover;
-
-    background: #080c14;
-
-    border: 1px solid var(--border);
-    border-radius: 6px;
-}
-
-.file-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.file-name {
-    overflow: hidden;
-
-    color: var(--text);
-
-    font-size: 10px;
-    font-weight: 700;
-
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.file-size {
-    margin-top: 4px;
-
-    color: var(--text-muted);
-
-    font-size: 9px;
-}
-
-.file-remove {
-    width: 25px;
-    height: 25px;
-
-    flex-shrink: 0;
-
-    display: grid;
-    place-items: center;
-
-    color: var(--text-muted);
-
-    background: transparent;
-    border: 0;
-    border-radius: 6px;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-.file-remove:hover {
-    color: var(--danger);
-    background: rgba(255, 99, 124, 0.1);
-}
-
-.text-button {
-    color: var(--text-muted);
-
-    background: transparent;
-    border: 0;
-
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 1px;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-.text-button:hover {
-    color: var(--danger);
-}
-
-.clear-all-button {
-    display: block;
-
-    margin: 12px 0 0 auto;
-}
-
-
-/* =========================================================
-   9. SETTINGS
-   ========================================================= */
-
-.settings-panel {
-    padding-bottom: 18px;
-}
-
-.setting-group {
-    margin-top: 19px;
-}
-
-.setting-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 11px;
-}
-
-.setting-header label {
-    color: var(--text-secondary);
-
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.setting-value {
-    min-width: 42px;
-
-    color: var(--accent);
-
-    text-align: right;
-
-    font-size: 10px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-}
-
-
-/* =========================================================
-   10. RANGE INPUT
-   ========================================================= */
-
-input[type="range"] {
-    width: 100%;
-    height: 4px;
-
-    display: block;
-
-    appearance: none;
-    -webkit-appearance: none;
-
-    background:
-        linear-gradient(
-            to right,
-            var(--accent) 0%,
-            var(--accent) 50%,
-            #28364b 50%,
-            #28364b 100%
-        );
-
-    border-radius: 10px;
-
-    outline: none;
-
-    cursor: pointer;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-    width: 13px;
-    height: 13px;
-
-    appearance: none;
-    -webkit-appearance: none;
-
-    background: var(--accent);
-
-    border: 3px solid #d8faff;
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 10px rgba(0, 213, 255, 0.4);
-
-    transition: transform var(--transition);
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.25);
-}
-
-input[type="range"]::-moz-range-thumb {
-    width: 10px;
-    height: 10px;
-
-    background: var(--accent);
-
-    border: 2px solid #d8faff;
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 10px rgba(0, 213, 255, 0.4);
-}
-
-.range-labels {
-    display: flex;
-    justify-content: space-between;
-
-    margin-top: 8px;
-
-    color: var(--text-muted);
-
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-
-/* =========================================================
-   11. SELECT
-   ========================================================= */
-
-.select-control {
-    width: 100%;
-    min-height: 38px;
-
-    padding: 0 12px;
-
-    color: var(--text);
-
-    background: #0b1422;
-
-    border: 1px solid var(--border);
-    border-radius: 8px;
-
-    outline: none;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-.select-control:hover {
-    border-color: rgba(0, 213, 255, 0.3);
-}
-
-.select-control:focus {
-    border-color: var(--accent);
-}
-
-.select-control option {
-    color: var(--text);
-    background: #101827;
-}
-
-
-/* =========================================================
-   12. TOGGLE SETTINGS
-   ========================================================= */
-
-.setting-divider {
-    height: 1px;
-
-    margin: 20px 0;
-
-    background: var(--border);
-}
-
-.toggle-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 12px;
-
-    cursor: pointer;
-}
-
-.toggle-text {
-    color: var(--text-secondary);
-
-    font-size: 10px;
-    font-weight: 600;
-
-    transition: color var(--transition);
-}
-
-.toggle-row:hover .toggle-text {
-    color: var(--text);
-}
-
-.toggle-row input {
-    position: absolute;
-
-    width: 1px;
-    height: 1px;
-
-    opacity: 0;
-}
-
-.toggle-switch {
-    width: 34px;
-    height: 19px;
-
-    flex-shrink: 0;
-
-    position: relative;
-
-    background: #29364a;
-
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
-
-    transition: var(--transition);
-}
-
-.toggle-switch::after {
-    content: "";
-
-    position: absolute;
-
-    top: 3px;
-    left: 3px;
-
-    width: 11px;
-    height: 11px;
-
-    background: #8997aa;
-
-    border-radius: 50%;
-
-    transition: var(--transition);
-}
-
-.toggle-row input:checked + .toggle-switch {
-    background: rgba(0, 213, 255, 0.25);
-
-    border-color: rgba(0, 213, 255, 0.4);
-}
-
-.toggle-row input:checked + .toggle-switch::after {
-    left: 18px;
-
-    background: var(--accent);
-
-    box-shadow:
-        0 0 9px rgba(0, 213, 255, 0.5);
-}
-
-.toggle-row input:focus-visible + .toggle-switch {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-}
-
-
-/* =========================================================
-   13. CONVERSION BUTTONS
-   ========================================================= */
-
-.conversion-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-
-    margin-top: 23px;
-}
-
-.primary-button {
-    width: 100%;
-    min-height: 46px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-
-    color: #04131b;
-
-    background:
-        linear-gradient(
-            110deg,
-            #00c8f0,
-            #5be6ff
-        );
-
-    border: 0;
-    border-radius: 9px;
-
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 1px;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 5px 20px rgba(0, 213, 255, 0.12);
-
-    transition: var(--transition);
-}
-
-.primary-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-
-    box-shadow:
-        0 8px 28px rgba(0, 213, 255, 0.25);
-}
-
-.primary-button:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.button-icon {
-    font-size: 17px;
-}
-
-.secondary-button {
-    min-height: 38px;
-
-    padding: 0 13px;
-
-    color: var(--text-secondary);
-
-    background: rgba(255, 255, 255, 0.035);
-
-    border: 1px solid var(--border);
-    border-radius: 8px;
-
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-.secondary-button:hover:not(:disabled) {
-    color: var(--accent);
-
-    border-color: var(--border-bright);
-    background: rgba(0, 213, 255, 0.06);
-}
-
-#cancelBtn {
-    color: var(--danger);
-}
-
-#cancelBtn:hover:not(:disabled) {
-    background: rgba(255, 99, 124, 0.08);
-    border-color: rgba(255, 99, 124, 0.25);
-}
-
-
-/* =========================================================
-   14. WORKSPACE HEADER
-   ========================================================= */
-
-.workspace-header {
-    min-height: 50px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 15px;
-}
-
-.workspace-title {
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 1.8px;
-}
-
-.active-file-label {
-    margin-top: 5px;
-
-    color: var(--text-muted);
-
-    font-size: 10px;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.workspace-actions {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.icon-button {
-    width: 36px;
-    height: 36px;
-
-    display: grid;
-    place-items: center;
-
-    color: var(--text-secondary);
-
-    background: var(--panel);
-
-    border: 1px solid var(--border);
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-.icon-button:hover {
-    color: var(--accent);
-    border-color: var(--border-bright);
-}
-
-.small-button {
-    min-height: 36px;
-}
-
-
-/* =========================================================
-   15. PREVIEW PANEL
-   ========================================================= */
-
-.preview-panel {
-    overflow: hidden;
-}
-
-.preview-toolbar {
-    min-height: 54px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 10px;
-
-    padding: 0 17px;
-
-    border-bottom: 1px solid var(--border);
-}
-
-.preview-tabs {
-    height: 54px;
-
-    display: flex;
-    align-items: stretch;
-    gap: 18px;
-}
-
-.preview-tab {
-    position: relative;
-
-    padding: 0 2px;
-
-    color: var(--text-muted);
-
-    background: transparent;
-    border: 0;
-
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-
-    cursor: pointer;
-
-    transition: var(--transition);
-}
-
-.preview-tab:hover {
-    color: var(--text);
-}
-
-.preview-tab.active {
-    color: var(--accent);
-}
-
-.preview-tab.active::after {
-    content: "";
-
-    position: absolute;
-
-    bottom: -1px;
-    left: 0;
-
-    width: 100%;
-    height: 2px;
-
-    background: var(--accent);
-
-    box-shadow:
-        0 0 12px rgba(0, 213, 255, 0.5);
-}
-
-.preview-format {
-    color: var(--text-muted);
-
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   16. PREVIEW STAGE
-   ========================================================= */
-
-.preview-stage {
-    position: relative;
-
-    min-height: 440px;
-    height: min(60vh, 680px);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 30px;
-
-    overflow: hidden;
-
-    background-color: #0a111d;
-
-    background-image:
-        linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.018) 25%,
-            transparent 25%
-        ),
-        linear-gradient(
-            -45deg,
-            rgba(255, 255, 255, 0.018) 25%,
-            transparent 25%
-        ),
-        linear-gradient(
-            45deg,
-            transparent 75%,
-            rgba(255, 255, 255, 0.018) 75%
-        ),
-        linear-gradient(
-            -45deg,
-            transparent 75%,
-            rgba(255, 255, 255, 0.018) 75%
-        );
-
-    background-size: 24px 24px;
-    background-position:
-        0 0,
-        0 12px,
-        12px -12px,
-        -12px 0;
-}
-
-.preview-image {
-    display: block;
-
-    max-width: 100%;
-    max-height: 100%;
-
-    object-fit: contain;
-
-    filter:
-        drop-shadow(
-            0 12px 25px rgba(0, 0, 0, 0.35)
-        );
-
-    transform-origin: center center;
-
-    transition:
-        opa
+/* =========================
+   END OF PART 1
+========================= */
