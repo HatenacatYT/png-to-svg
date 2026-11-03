@@ -1079,3 +1079,278 @@ input[type="range"]::-moz-range-thumb {
 /* =========================
    END OF PART 2
 ========================= */
+/* =========================================
+   PREVIEW PANEL
+========================================= */
+
+.preview-panel {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.preview-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-secondary);
+    border-radius: 9px;
+}
+
+.preview-tab {
+    padding: 7px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.preview-tab:hover {
+    color: var(--text-primary);
+}
+
+.preview-tab.active {
+    background: var(--bg-elevated);
+    color: var(--accent);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.preview-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tool-button {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tool-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.zoom-label {
+    min-width: 48px;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================
+   PREVIEW STAGE
+========================================= */
+
+.preview-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: 1;
+    min-height: 420px;
+    overflow: hidden;
+    background-color: #171a21;
+    background-image:
+        linear-gradient(45deg, #20242d 25%, transparent 25%),
+        linear-gradient(-45deg, #20242d 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #20242d 75%),
+        linear-gradient(-45deg, transparent 75%, #20242d 75%);
+    background-size: 24px 24px;
+    background-position:
+        0 0,
+        0 12px,
+        12px -12px,
+        -12px 0;
+}
+
+.preview-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 28px;
+    overflow: auto;
+}
+
+.preview-image {
+    display: none;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transform-origin: center;
+    transition: transform 0.15s ease;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
+}
+
+.preview-image.visible {
+    display: block;
+}
+
+.preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    max-width: 300px;
+    padding: 32px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.preview-placeholder svg {
+    width: 54px;
+    height: 54px;
+    color: #515967;
+    stroke-width: 1.2;
+}
+
+.preview-placeholder strong {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.preview-placeholder span {
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* =========================================
+   SVG CODE VIEW
+========================================= */
+
+.code-panel {
+    display: none;
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+    overflow: auto;
+    background: #11141a;
+}
+
+.code-panel:not([hidden]) {
+    display: block;
+}
+
+.code-area {
+    min-width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 22px;
+    color: #b8d8df;
+    font-family: "Cascadia Code", "Consolas", monospace;
+    font-size: 12px;
+    line-height: 1.75;
+    white-space: pre;
+    tab-size: 2;
+}
+
+/* =========================================
+   INFO VIEW
+========================================= */
+
+.info-panel {
+    display: none;
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+    padding: 24px;
+    overflow-y: auto;
+    background: var(--bg-panel);
+}
+
+.info-panel:not([hidden]) {
+    display: block;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.info-card {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-secondary);
+}
+
+.info-card-label {
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.info-card-value {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.info-description {
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   PREVIEW FOOTER
+========================================= */
+
+.preview-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 10px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-panel);
+}
+
+.preview-dimensions {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.preview-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
