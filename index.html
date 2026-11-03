@@ -3,615 +3,466 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#101116">
 <title>VECTOR FORGE</title>
 
 <style>
 :root {
-  --bg: #101116;
-  --panel: #191b23;
-  --panel2: #20232d;
-  --border: #303440;
-  --text: #f2f3f7;
-  --muted: #9299a8;
-  --accent: #8b7cff;
-  --cyan: #45d9c1;
-  --danger: #ff657b;
+  --bg:#101116;
+  --panel:#191b23;
+  --panel2:#20232d;
+  --border:#303440;
+  --text:#f2f3f7;
+  --muted:#9299a8;
+  --accent:#8b7cff;
+  --cyan:#45d9c1;
+  --danger:#ff657b;
+  --radius:13px;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing:border-box; }
+
+html { scroll-behavior:smooth; }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, "Segoe UI", system-ui, sans-serif;
-  font-size: 14px;
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,"Segoe UI",system-ui,sans-serif;
+  font-size:14px;
 }
 
-button, input, select {
-  font: inherit;
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; }
+button:disabled { opacity:.4; cursor:not-allowed; }
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline:2px solid var(--cyan);
+  outline-offset:3px;
 }
 
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: .4;
-  cursor: not-allowed;
-}
-
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+.app { min-height:100vh; display:flex; flex-direction:column; }
 
 header {
-  height: 64px;
-  padding: 0 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  background: #14151c;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  height:64px;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  background:#14151c;
+  position:sticky;
+  top:0;
+  z-index:10;
+  backdrop-filter:blur(14px);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.brand { display:flex; align-items:center; gap:12px; }
 
 .logo {
-  width: 35px;
-  height: 35px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #8c7aff, #4bd9c3);
-  color: #101116;
-  font-size: 19px;
-  font-weight: 900;
+  width:35px;
+  height:35px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#8c7aff,#4bd9c3);
+  color:#101116;
+  font-size:19px;
+  font-weight:900;
 }
 
-.brand-name {
-  font-weight: 800;
-  letter-spacing: 1.3px;
-}
+.brand-name { font-weight:800; letter-spacing:1.3px; }
+.brand-sub { font-size:10px; color:var(--muted); letter-spacing:1.5px; margin-top:2px; }
 
-.brand-sub {
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 1.5px;
-  margin-top: 2px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.status {
-  color: var(--muted);
-  font-size: 11px;
-}
-
+.header-right { display:flex; align-items:center; gap:12px; }
+.status { color:var(--muted); font-size:11px; }
 .status-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  background: #4bd9a8;
-  border-radius: 50%;
-  margin-right: 6px;
+  display:inline-block;
+  width:7px;
+  height:7px;
+  background:#4bd9a8;
+  border-radius:50%;
+  margin-right:6px;
 }
 
 main {
-  width: min(1500px, 100%);
-  margin: auto;
-  padding: 22px;
-  display: grid;
-  grid-template-columns: 290px minmax(0, 1fr);
-  gap: 20px;
-  flex: 1;
+  width:min(1500px,100%);
+  margin:auto;
+  padding:22px;
+  display:grid;
+  grid-template-columns:290px minmax(0,1fr);
+  gap:20px;
+  flex:1;
 }
 
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  overflow: hidden;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  min-width:0;
 }
 
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+.sidebar { display:flex; flex-direction:column; gap:14px; }
 
 .panel-heading {
-  padding: 15px 16px;
-  border-bottom: 1px solid var(--border);
-  font-weight: 750;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding:15px 16px;
+  border-bottom:1px solid var(--border);
+  font-weight:750;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-.panel-body {
-  padding: 16px;
-}
-
-.value {
-  color: var(--cyan);
-  font-size: 11px;
-}
+.panel-body { padding:16px; }
+.value { color:var(--cyan); font-size:11px; }
 
 .dropzone {
-  min-height: 150px;
-  border: 1px dashed #626a80;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 16px;
-  background: #1c1e28;
-  transition: .2s;
-  cursor: pointer;
+  min-height:150px;
+  border:1px dashed #626a80;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:16px;
+  background:#1c1e28;
+  transition:background .2s,border-color .2s,transform .2s;
+  cursor:pointer;
+  user-select:none;
 }
 
 .dropzone:hover,
 .dropzone.dragover {
-  border-color: var(--accent);
-  background: #28243d;
+  border-color:var(--accent);
+  background:#28243d;
 }
 
-.drop-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+.dropzone.dragover { transform:scale(.99); }
+.drop-icon { font-size:32px; margin-bottom:8px; }
+.drop-title { font-weight:750; }
+.drop-sub { font-size:11px; color:var(--muted); margin-top:7px; line-height:1.7; }
+
+#fileInput {
+  position:fixed;
+  left:-10000px;
+  top:0;
+  width:1px;
+  height:1px;
+  opacity:0;
 }
 
-.drop-title {
-  font-weight: 750;
-}
-
-.drop-sub {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 7px;
-  line-height: 1.7;
-}
-
-.file-list {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
+.file-list { margin-top:12px; display:flex; flex-direction:column; gap:7px; }
 
 .file-item {
-  padding: 9px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-  background: #1b1d26;
+  padding:9px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+  background:#1b1d26;
+  transition:border-color .18s,background .18s;
 }
 
-.file-item.active {
-  border-color: var(--accent);
-  background: #242238;
-}
+.file-item.active { border-color:var(--accent); background:#242238; }
 
 .file-thumb {
-  width: 36px;
-  height: 36px;
-  object-fit: cover;
-  border-radius: 5px;
-  background: #292c37;
+  width:36px;
+  height:36px;
+  object-fit:cover;
+  border-radius:5px;
+  background:#292c37;
+  flex-shrink:0;
 }
 
-.file-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.file-name {
-  font-size: 11px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.file-meta {
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 3px;
-}
+.file-info { flex:1; min-width:0; }
+.file-name { font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.file-meta { font-size:10px; color:var(--muted); margin-top:3px; }
 
 .icon-btn {
-  background: transparent;
-  border: 0;
-  color: var(--muted);
-  padding: 5px;
-  border-radius: 5px;
+  background:transparent;
+  border:0;
+  color:var(--muted);
+  padding:6px;
+  border-radius:5px;
+  flex-shrink:0;
 }
 
-.icon-btn:hover {
-  background: #343744;
-  color: white;
-}
+.icon-btn:hover { background:#343744; color:white; }
 
-.control {
-  margin-bottom: 17px;
-}
+.control { margin-bottom:17px; }
+.control-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.control label { font-size:12px; font-weight:650; }
 
-.control-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.control label {
-  font-size: 12px;
-  font-weight: 650;
-}
-
-input[type="range"] {
-  width: 100%;
-  accent-color: var(--accent);
-}
+input[type="range"] { width:100%; accent-color:var(--accent); }
 
 select {
-  width: 100%;
-  padding: 10px;
-  background: #11131a;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  outline: none;
+  width:100%;
+  padding:10px;
+  background:#11131a;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:7px;
+  outline:none;
 }
 
 .toggle-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin: 13px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin:13px 0;
 }
 
-.toggle-row span {
-  font-size: 12px;
-}
+.toggle-row span { font-size:12px; }
 
 .toggle {
-  appearance: none;
-  width: 35px;
-  height: 19px;
-  background: #454957;
-  border-radius: 20px;
-  position: relative;
-  cursor: pointer;
-  flex-shrink: 0;
+  appearance:none;
+  width:35px;
+  height:19px;
+  background:#454957;
+  border-radius:20px;
+  position:relative;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:background .2s;
 }
 
 .toggle::before {
-  content: "";
-  position: absolute;
-  left: 3px;
-  top: 3px;
-  width: 13px;
-  height: 13px;
-  background: white;
-  border-radius: 50%;
-  transition: .2s;
+  content:"";
+  position:absolute;
+  left:3px;
+  top:3px;
+  width:13px;
+  height:13px;
+  background:white;
+  border-radius:50%;
+  transition:transform .2s;
 }
 
-.toggle:checked {
-  background: var(--accent);
-}
-
-.toggle:checked::before {
-  left: 19px;
-}
+.toggle:checked { background:var(--accent); }
+.toggle:checked::before { transform:translateX(16px); }
 
 .btn {
-  border: 1px solid var(--border);
-  color: var(--text);
-  background: #292c37;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  transition: .15s;
+  border:1px solid var(--border);
+  color:var(--text);
+  background:#292c37;
+  padding:10px 12px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+  transition:filter .15s,transform .15s,background .15s;
 }
 
-.btn:hover:not(:disabled) {
-  filter: brightness(1.2);
-}
+.btn:hover:not(:disabled) { filter:brightness(1.2); }
+.btn:active:not(:disabled) { transform:scale(.98); }
 
 .btn.primary {
-  background: linear-gradient(110deg, #8979ff, #6d61e8);
-  border-color: transparent;
-  color: white;
+  background:linear-gradient(110deg,#8979ff,#6d61e8);
+  border-color:transparent;
+  color:white;
 }
 
 .btn.secondary {
-  background: #202e32;
-  border-color: #31514f;
-  color: #72e4cf;
+  background:#202e32;
+  border-color:#31514f;
+  color:#72e4cf;
 }
 
-.btn.full {
-  width: 100%;
+.btn.danger {
+  background:#38232a;
+  border-color:#633542;
+  color:#ff9cac;
 }
 
-.btn-row {
-  display: flex;
-  gap: 8px;
-}
+.btn.full { width:100%; }
+.btn-row { display:flex; gap:8px; }
+.btn-row > * { flex:1; min-width:0; }
 
-.btn-row > * {
-  flex: 1;
-}
-
-.workspace {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+.workspace { min-width:0; display:flex; flex-direction:column; gap:14px; }
 
 .toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
-.tabs {
-  display: flex;
-  gap: 6px;
-}
+.tabs { display:flex; gap:6px; }
 
 .tab {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  padding: 9px 13px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:9px 13px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+  transition:background .2s,color .2s;
 }
 
 .tab.active {
-  background: #28243e;
-  color: #c0b7ff;
-  border-color: #6558a6;
+  background:#28243e;
+  color:#c0b7ff;
+  border-color:#6558a6;
 }
 
-.preview-panel {
-  min-height: 430px;
-  display: flex;
-  flex-direction: column;
-}
+.preview-panel { min-height:430px; display:flex; flex-direction:column; }
 
 .preview-head {
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding:13px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
 }
 
 .preview-stage {
-  flex: 1;
-  min-height: 370px;
-  padding: 18px;
-  display: grid;
-  place-items: center;
-  overflow: auto;
-  background-color: #171922;
+  flex:1;
+  min-height:370px;
+  padding:18px;
+  display:grid;
+  place-items:center;
+  overflow:auto;
+  background-color:#171922;
   background-image:
-    linear-gradient(45deg, #20232c 25%, transparent 25%),
-    linear-gradient(-45deg, #20232c 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #20232c 75%),
-    linear-gradient(-45deg, transparent 75%, #20232c 75%);
-  background-size: 22px 22px;
-  background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+    linear-gradient(45deg,#20232c 25%,transparent 25%),
+    linear-gradient(-45deg,#20232c 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#20232c 75%),
+    linear-gradient(-45deg,transparent 75%,#20232c 75%);
+  background-size:22px 22px;
+  background-position:0 0,0 11px,11px -11px,-11px 0;
 }
 
-.preview-stage img,
-.preview-stage svg {
-  max-width: 100%;
-  max-height: 540px;
-  object-fit: contain;
+.preview-stage img {
+  display:block;
+  max-width:100%;
+  max-height:540px;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  border-radius:3px;
+  animation:previewIn .25s ease both;
 }
 
-.preview-stage .empty {
-  text-align: center;
-  color: var(--muted);
-  line-height: 1.8;
+@keyframes previewIn {
+  from { opacity:0; transform:scale(.985); }
+  to { opacity:1; transform:scale(1); }
 }
 
-.empty-icon {
-  font-size: 42px;
-  margin-bottom: 10px;
-}
+.preview-stage .empty { text-align:center; color:var(--muted); line-height:1.8; }
+.empty-icon { font-size:42px; margin-bottom:10px; }
 
 .preview-footer {
-  padding: 10px 15px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-  color: var(--muted);
-  font-size: 11px;
+  padding:10px 15px;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:11px;
 }
 
-.progress-wrap {
-  height: 4px;
-  background: #292c36;
-  overflow: hidden;
-}
-
+.progress-wrap { height:4px; background:#292c36; overflow:hidden; }
 .progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--accent), var(--cyan));
-  transition: width .15s;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--cyan));
+  transition:width .18s ease;
 }
 
-.result-panel {
-  display: flex;
-  flex-direction: column;
-}
+.result-panel { display:flex; flex-direction:column; }
 
-.result-tabs {
-  display: flex;
-  gap: 5px;
-}
+.result-tabs { display:flex; gap:5px; }
 
 .result-tabs button {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 11px;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  padding:7px 10px;
+  border-radius:6px;
+  font-size:11px;
 }
 
-.result-tabs button.active {
-  background: #303044;
-  color: white;
-}
+.result-tabs button.active { background:#303044; color:white; }
 
 .code-area {
-  width: 100%;
-  height: 240px;
-  resize: vertical;
-  border: 0;
-  outline: none;
-  padding: 14px;
-  background: #11131a;
-  color: #b9d6ca;
-  font: 11px/1.6 Consolas, monospace;
+  width:100%;
+  height:240px;
+  resize:vertical;
+  border:0;
+  outline:none;
+  padding:14px;
+  background:#11131a;
+  color:#b9d6ca;
+  font:11px/1.6 Consolas,monospace;
 }
 
-.result-empty {
-  padding: 25px;
-  color: var(--muted);
-  text-align: center;
-}
-
-.hidden {
-  display: none !important;
-}
-
-#fileInput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
+.result-empty { padding:25px; color:var(--muted); text-align:center; line-height:1.7; }
+.hidden { display:none !important; }
 
 .toast {
-  position: fixed;
-  bottom: 22px;
-  right: 22px;
-  max-width: calc(100vw - 44px);
-  background: #292d39;
-  border: 1px solid #4b5263;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 9px;
-  box-shadow: 0 10px 30px #0008;
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  transition: .2s;
-  z-index: 100;
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  max-width:calc(100vw - 44px);
+  background:#292d39;
+  border:1px solid #4b5263;
+  color:white;
+  padding:12px 16px;
+  border-radius:9px;
+  box-shadow:0 10px 30px #0008;
+  opacity:0;
+  transform:translateY(10px);
+  pointer-events:none;
+  transition:opacity .2s,transform .2s;
+  z-index:100;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+.toast.show { opacity:1; transform:translateY(0); }
 
 footer {
-  border-top: 1px solid var(--border);
-  padding: 14px 22px;
-  color: var(--muted);
-  font-size: 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
+  border-top:1px solid var(--border);
+  padding:14px 22px;
+  color:var(--muted);
+  font-size:10px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 @media(max-width:900px) {
-  main {
-    grid-template-columns: 1fr;
-    padding: 13px;
-  }
+  main { grid-template-columns:1fr; padding:13px; }
 }
 
 @media(max-width:600px) {
-  header {
-    padding: 0 13px;
-    height: 58px;
-  }
+  header { padding:0 13px; height:58px; }
+  .status { display:none; }
+  main { padding:10px; gap:12px; }
+  .preview-panel { min-height:340px; }
+  .preview-stage { min-height:280px; padding:10px; }
+  .toolbar { align-items:stretch; }
+  .toolbar .btn-row,.toolbar .tabs { width:100%; }
+  .toolbar .tab { flex:1; }
+  footer { padding:12px; }
+}
 
-  .status {
-    display: none;
-  }
-
-  main {
-    padding: 10px;
-    gap: 12px;
-  }
-
-  .preview-panel {
-    min-height: 340px;
-  }
-
-  .preview-stage {
-    min-height: 280px;
-    padding: 10px;
-  }
-
-  .toolbar {
-    align-items: stretch;
-  }
-
-  .toolbar .btn-row,
-  .toolbar .tabs {
-    width: 100%;
-  }
-
-  .toolbar .tab {
-    flex: 1;
-  }
-
-  footer {
-    padding: 12px;
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    scroll-behavior:auto !important;
+    animation-duration:.01ms !important;
+    transition-duration:.01ms !important;
   }
 }
 </style>
@@ -628,7 +479,6 @@ footer {
       <div class="brand-sub">IMAGE TO SVG STUDIO</div>
     </div>
   </div>
-
   <div class="header-right">
     <span class="status"><i class="status-dot"></i>LOCAL PROCESSING</span>
     <button class="btn" id="clearAll">リセット</button>
@@ -636,7 +486,6 @@ footer {
 </header>
 
 <main>
-
 <aside class="sidebar">
 
   <section class="panel">
@@ -644,9 +493,9 @@ footer {
       <span>画像ファイル</span>
       <span id="fileCount" class="value">0 FILES</span>
     </div>
-
     <div class="panel-body">
-      <div class="dropzone" id="dropzone" role="button" tabindex="0">
+      <div class="dropzone" id="dropzone" role="button" tabindex="0"
+           aria-label="画像を追加">
         <div class="drop-icon">↥</div>
         <div class="drop-title">画像を追加</div>
         <div class="drop-sub">
@@ -654,23 +503,18 @@ footer {
           PNG / JPG / WEBP / BMP / GIF
         </div>
       </div>
-
       <input id="fileInput" type="file"
-        accept=".png,.jpg,.jpeg,.webp,.bmp,.gif,image/*" multiple>
-
+             accept=".png,.jpg,.jpeg,.webp,.bmp,.gif,image/*" multiple>
       <div class="file-list" id="fileList"></div>
     </div>
   </section>
 
   <section class="panel">
     <div class="panel-heading">変換設定</div>
-
     <div class="panel-body">
 
       <div class="control">
-        <div class="control-head">
-          <label for="mode">出力方式</label>
-        </div>
+        <div class="control-head"><label for="mode">出力方式</label></div>
         <select id="mode">
           <option value="vector">ベクター化 SVG</option>
           <option value="embed">画像埋め込み SVG</option>
@@ -678,7 +522,6 @@ footer {
       </div>
 
       <div id="vectorSettings">
-
         <div class="control">
           <div class="control-head">
             <label for="colors">色数</label>
@@ -723,9 +566,7 @@ footer {
       </div>
 
       <div class="control">
-        <div class="control-head">
-          <label for="maxSize">最大出力サイズ</label>
-        </div>
+        <div class="control-head"><label for="maxSize">最大出力サイズ</label></div>
         <select id="maxSize">
           <option value="2048">2048 px</option>
           <option value="4096" selected>4096 px</option>
@@ -733,10 +574,7 @@ footer {
         </select>
       </div>
 
-      <button class="btn primary full" id="convertBtn" disabled>
-        ✦ SVGに変換
-      </button>
-
+      <button class="btn primary full" id="convertBtn" disabled>✦ SVGに変換</button>
     </div>
   </section>
 
@@ -748,22 +586,18 @@ footer {
         <button class="btn" id="zipBtn" disabled>ZIP保存</button>
       </div>
       <div style="height:8px"></div>
-      <button class="btn full" id="copyBtn" disabled>
-        SVGコードをコピー
-      </button>
+      <button class="btn full" id="copyBtn" disabled>SVGコードをコピー</button>
     </div>
   </section>
 
 </aside>
 
 <section class="workspace">
-
   <div class="toolbar">
     <div class="tabs">
       <button class="tab active" id="originalTab">ORIGINAL</button>
       <button class="tab" id="outputTab">SVG OUTPUT</button>
     </div>
-
     <div class="btn-row">
       <button class="btn" id="fitBtn">表示をリセット</button>
       <button class="btn primary" id="quickSave" disabled>ダウンロード ↓</button>
@@ -771,12 +605,10 @@ footer {
   </div>
 
   <section class="panel preview-panel">
-
     <div class="preview-head">
       <strong id="previewTitle">プレビュー</strong>
       <span class="value" id="previewFormat">NO IMAGE</span>
     </div>
-
     <div class="preview-stage" id="previewStage">
       <div class="empty">
         <div class="empty-icon">◈</div>
@@ -784,16 +616,13 @@ footer {
         画像を追加すると、ここにプレビューが表示されます。
       </div>
     </div>
-
     <div class="progress-wrap">
       <div class="progress-bar" id="progress"></div>
     </div>
-
     <div class="preview-footer">
       <span id="imageDimensions">画像未選択</span>
       <span id="outputInfo">出力待機中</span>
     </div>
-
   </section>
 
   <section class="panel result-panel">
@@ -804,17 +633,10 @@ footer {
         <button id="infoTab">INFO</button>
       </div>
     </div>
-
-    <textarea id="codeArea" class="code-area"
-      spellcheck="false"
-      placeholder="変換後のSVGコードがここに表示されます。"
-      readonly></textarea>
-
-    <div id="infoArea" class="result-empty hidden">
-      まだ変換結果がありません。
-    </div>
+    <textarea id="codeArea" class="code-area" spellcheck="false"
+      placeholder="変換後のSVGコードがここに表示されます。" readonly></textarea>
+    <div id="infoArea" class="result-empty hidden">まだ変換結果がありません。</div>
   </section>
-
 </section>
 </main>
 
@@ -822,63 +644,73 @@ footer {
   <span>VECTOR FORGE · CLIENT-SIDE SVG CONVERTER</span>
   <span>Files are processed locally in your browser.</span>
 </footer>
-
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 "use strict";
 
 /* =========================================================
-   VECTOR FORGE APPLICATION
+   VECTOR FORGE
+   Worker-based image tracing
    ========================================================= */
 
 const $ = id => document.getElementById(id);
+
+const CONFIG = {
+  maxFiles: 30,
+  maxFileBytes: 25 * 1024 * 1024,
+  maxSourcePixels: 50000000,
+  maxProcessPixels: 8000000,
+  workerTimeout: 180000,
+  tracerURL: "https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"
+};
 
 const state = {
   files: [],
   activeId: null,
   results: new Map(),
   previewMode: "original",
-  busy: false
+  busy: false,
+  cancelRequested: false,
+  worker: null,
+  runId: 0,
+  previewURL: null
 };
 
 let nextId = 1;
 let toastTimer = null;
 
-const SUPPORTED_EXTENSIONS = [
-  "png", "jpg", "jpeg", "webp", "bmp", "gif"
-];
+const SUPPORTED = new Set(["png","jpg","jpeg","webp","bmp","gif"]);
+
+/* ---------- Utility ---------- */
 
 function toast(message) {
-  const element = $("toast");
-
-  element.textContent = message;
-  element.classList.add("show");
-
+  const el = $("toast");
+  el.textContent = message;
+  el.classList.add("show");
   clearTimeout(toastTimer);
-
-  toastTimer = setTimeout(() => {
-    element.classList.remove("show");
-  }, 2800);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
 }
 
 function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes < 0) return "—";
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / 1048576).toFixed(2) + " MB";
 }
 
 function safeName(name) {
-  return name
+  return String(name || "image")
     .replace(/\.[^.]+$/, "")
     .replace(/[\\/:*?"<>|]/g, "_")
-    .slice(0, 100) || "image";
+    .replace(/[\u0000-\u001f]/g, "")
+    .slice(0, 90) || "image";
 }
 
 function getActiveFile() {
-  return state.files.find(file => file.id === state.activeId) || null;
+  return state.files.find(item => item.id === state.activeId) || null;
 }
 
 function getActiveResult() {
@@ -889,11 +721,11 @@ function updateButtons() {
   const hasFile = !!getActiveFile();
   const hasResult = !!getActiveResult();
 
-  $("convertBtn").disabled = !hasFile || state.busy;
+  $("convertBtn").disabled = !hasFile && !state.busy;
   $("saveBtn").disabled = !hasResult || state.busy;
   $("zipBtn").disabled = state.results.size === 0 || state.busy;
-  $("copyBtn").disabled = !hasResult;
-  $("quickSave").disabled = !hasResult;
+  $("copyBtn").disabled = !hasResult || state.busy;
+  $("quickSave").disabled = !hasResult || state.busy;
 }
 
 function updateFileCount() {
@@ -903,108 +735,163 @@ function updateFileCount() {
 function updateSettingsLabels() {
   $("colorsValue").textContent = $("colors").value;
   $("scaleValue").textContent = $("scale").value + "%";
-  $("simplifyValue").textContent =
-    Number($("simplify").value).toFixed(1);
+  $("simplifyValue").textContent = Number($("simplify").value).toFixed(1);
   $("thresholdValue").textContent = $("threshold").value;
 }
 
-["colors", "scale", "simplify", "threshold"].forEach(id => {
-  $(id).addEventListener("input", updateSettingsLabels);
-});
-
-$("mode").addEventListener("change", () => {
-  $("vectorSettings").classList.toggle(
-    "hidden",
-    $("mode").value !== "vector"
-  );
-});
-
 function setProgress(value) {
-  $("progress").style.width =
-    Math.max(0, Math.min(100, value)) + "%";
+  $("progress").style.width = Math.max(0, Math.min(100, value)) + "%";
 }
 
 function setBusy(value) {
   state.busy = value;
-
-  $("convertBtn").textContent = value
-    ? "処理中..."
-    : "✦ SVGに変換";
-
+  $("convertBtn").textContent = value ? "■ 変換をキャンセル" : "✦ SVGに変換";
+  $("convertBtn").classList.toggle("danger", value);
   updateButtons();
 }
 
-/* =========================================================
-   FILE TYPE DETECTION
-   ========================================================= */
-
-function isSupportedImage(file) {
-  if (!file) return false;
-
-  if (file.type && file.type.startsWith("image/")) {
-    return true;
+function revokePreviewURL() {
+  if (state.previewURL) {
+    URL.revokeObjectURL(state.previewURL);
+    state.previewURL = null;
   }
-
-  const extension = file.name
-    .split(".")
-    .pop()
-    .toLowerCase();
-
-  return SUPPORTED_EXTENSIONS.includes(extension);
 }
 
-/* =========================================================
-   IMAGE LOADING
-   ========================================================= */
+function setPreviewImage(blob, alt) {
+  revokePreviewURL();
+
+  const url = URL.createObjectURL(blob);
+  state.previewURL = url;
+
+  const img = document.createElement("img");
+  img.alt = alt || "Preview";
+  img.onload = () => {
+    if (state.previewURL !== url) URL.revokeObjectURL(url);
+  };
+  img.onerror = () => {
+    if (state.previewURL === url) {
+      URL.revokeObjectURL(url);
+      state.previewURL = null;
+    }
+    showEmptyPreview("プレビューを表示できませんでした。");
+  };
+  img.src = url;
+
+  $("previewStage").replaceChildren(img);
+}
+
+function showEmptyPreview(message) {
+  revokePreviewURL();
+  const box = document.createElement("div");
+  box.className = "empty";
+  const icon = document.createElement("div");
+  icon.className = "empty-icon";
+  icon.textContent = "◈";
+  const strong = document.createElement("strong");
+  strong.textContent = "VECTOR FORGE";
+  const text = document.createElement("div");
+  text.textContent = message;
+  box.append(icon, strong, document.createElement("br"), text);
+  $("previewStage").replaceChildren(box);
+}
+
+/* ---------- Settings ---------- */
+
+["colors","scale","simplify","threshold"].forEach(id => {
+  $(id).addEventListener("input", updateSettingsLabels);
+});
+
+$("mode").addEventListener("change", () => {
+  $("vectorSettings").classList.toggle("hidden", $("mode").value !== "vector");
+});
+
+/* ---------- Image loading ---------- */
 
 function loadImage(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const image = new Image();
 
+    let finished = false;
+
+    const cleanupFailure = error => {
+      if (finished) return;
+      finished = true;
+      URL.revokeObjectURL(url);
+      reject(error);
+    };
+
     image.onload = () => {
-      if (!image.naturalWidth || !image.naturalHeight) {
-        URL.revokeObjectURL(url);
-        reject(new Error("画像サイズを取得できません。"));
+      if (finished) return;
+
+      const width = image.naturalWidth;
+      const height = image.naturalHeight;
+      const pixels = width * height;
+
+      if (!width || !height) {
+        cleanupFailure(new Error("画像サイズを取得できません。"));
         return;
       }
 
-      resolve({
-        image,
-        url,
-        width: image.naturalWidth,
-        height: image.naturalHeight
-      });
+      if (pixels > CONFIG.maxSourcePixels) {
+        cleanupFailure(new Error(
+          `${file.name}: 画像が大きすぎます。最大 ${CONFIG.maxSourcePixels.toLocaleString()} ピクセルまでです。`
+        ));
+        return;
+      }
+
+      finished = true;
+      resolve({ image, url, width, height });
     };
 
     image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("画像を読み込めませんでした: " + file.name));
+      cleanupFailure(new Error(`${file.name}: 画像を読み込めませんでした。`));
     };
 
     image.src = url;
   });
 }
 
-/* =========================================================
-   FILE IMPORT
-   ========================================================= */
+function isSupportedImage(file) {
+  if (!file) return false;
+  const ext = file.name.split(".").pop().toLowerCase();
+  return SUPPORTED.has(ext) || /^image\/(png|jpeg|webp|bmp|gif)$/i.test(file.type);
+}
+
+/* ---------- Import ---------- */
 
 async function addFiles(fileList) {
-  const files = Array.from(fileList || []);
+  if (state.busy) {
+    toast("変換中はファイルを追加できません。");
+    return;
+  }
 
-  if (!files.length) return;
+  const incoming = Array.from(fileList || []);
+  if (!incoming.length) return;
 
-  const accepted = files.filter(isSupportedImage);
+  const remaining = CONFIG.maxFiles - state.files.length;
+
+  if (remaining <= 0) {
+    toast(`一度に追加できる画像は最大${CONFIG.maxFiles}枚です。`);
+    return;
+  }
+
+  const accepted = incoming.filter(isSupportedImage).slice(0, remaining);
 
   if (!accepted.length) {
     toast("対応している画像ファイルを選択してください。");
     return;
   }
 
-  let successCount = 0;
+  let success = 0;
+  let firstError = "";
 
   for (const file of accepted) {
+    if (file.size > CONFIG.maxFileBytes) {
+      firstError ||= `${file.name}: ファイルサイズが25MBを超えています。`;
+      continue;
+    }
+
     try {
       const loaded = await loadImage(file);
 
@@ -1019,16 +906,12 @@ async function addFiles(fileList) {
       };
 
       state.files.push(entry);
-
-      if (state.activeId === null) {
-        state.activeId = entry.id;
-      }
-
-      successCount++;
+      if (state.activeId === null) state.activeId = entry.id;
+      success++;
 
     } catch (error) {
       console.error(error);
-      toast(error.message);
+      firstError ||= error.message;
     }
   }
 
@@ -1037,219 +920,911 @@ async function addFiles(fileList) {
   updateFileCount();
   updateButtons();
 
-  if (successCount > 0) {
-    toast(`${successCount}個の画像を読み込みました。`);
+  if (success) toast(`${success}個の画像を読み込みました。`);
+  if (firstError) toast(firstError);
+}
+
+/* ---------- File list ---------- */
+
+function renderFileList() {
+  const container = $("fileList");
+  container.replaceChildren();
+
+  for (const entry of state.files) {
+    const item = document.createElement("div");
+    item.className = "file-item" + (entry.id === state.activeId ? " active" : "");
+    item.addEventListener("click", () => selectFile(entry.id));
+
+    const thumb = document.createElement("img");
+    thumb.className = "file-thumb";
+    thumb.src = entry.url;
+    thumb.alt = "";
+
+    const info = document.createElement("div");
+    info.className = "file-info";
+
+    const name = document.createElement("div");
+    name.className = "file-name";
+    name.textContent = entry.name;
+    name.title = entry.name;
+
+    const meta = document.createElement("div");
+    meta.className = "file-meta";
+    meta.textContent = `${entry.width} × ${entry.height}`;
+
+    info.append(name, meta);
+
+    const remove = document.createElement("button");
+    remove.className = "icon-btn";
+    remove.type = "button";
+    remove.textContent = "✕";
+    remove.title = "削除";
+    remove.setAttribute("aria-label", entry.name + "を削除");
+
+    remove.addEventListener("click", event => {
+      event.stopPropagation();
+      removeFile(entry.id);
+    });
+
+    item.append(thumb, info, remove);
+    container.append(item);
   }
 }
 
-/* =========================================================
-   FILE LIST
-   ========================================================= */
-
-function removeFile(id) {
-  const entry = state.files.find(file => file.id === id);
-
-  if (entry) {
-    URL.revokeObjectURL(entry.url);
+function selectFile(id) {
+  if (state.busy) {
+    toast("変換中は画像を切り替えられません。");
+    return;
   }
 
-  state.files = state.files.filter(file => file.id !== id);
+  state.activeId = id;
+  renderFileList();
+  renderPreview();
+  updateButtons();
+}
+
+function removeFile(id) {
+  if (state.busy) {
+    toast("変換中は削除できません。");
+    return;
+  }
+
+  const entry = state.files.find(item => item.id === id);
+  if (entry) URL.revokeObjectURL(entry.url);
+
+  state.files = state.files.filter(item => item.id !== id);
   state.results.delete(id);
 
   if (state.activeId === id) {
-    state.activeId = state.files[removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  </script>
-</body>
-</html>grid';
-          svgContainer.innerHTML = '変換待ち...';
-          codeSection.style.display = 'none';
-          convertBtn.disabled = false;
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+    state.activeId = state.files.length ? state.files[0].id : null;
+  }
 
-    convertBtn.addEventListener('click', () => {
-      if (!currentImageDataUrl) {
-        alert('画像を選択してください。');
-        return;
-      }
+  renderFileList();
+  renderPreview();
+  updateFileCount();
+  updateButtons();
+}
 
-      if (typeof ImageTracer === 'undefined') {
-        alert('ライブラリの読み込みに失敗しています。インターネット接続をご確認ください。');
-        return;
-      }
+function clearAll() {
+  cancelConversion(false);
 
-      convertBtn.disabled = true;
-      convertBtn.textContent = '変換中...';
-      svgContainer.innerHTML = 'ベクター化を計算中...';
+  for (const entry of state.files) URL.revokeObjectURL(entry.url);
 
-      const options = {
-        numberofcolors: parseInt(colorsRange.value, 10),
-        pathomit: parseInt(omitRange.value, 10),
-        strokewidth: 1,
-        ltres: 1,
-        qtres: 1
-      };
+  state.files = [];
+  state.results.clear();
+  state.activeId = null;
+  state.previewMode = "original";
 
-      if (presetSelect.value === 'bw') {
-        options.numberofcolors = 2;
-        options.colorquantcycles = 1;
-      } else if (presetSelect.value === 'detailed') {
-        options.ltres = 0.5;
-        options.qtres = 0.5;
-      }
+  $("originalTab").classList.add("active");
+  $("outputTab").classList.remove("active");
+  $("codeArea").value = "";
+  $("infoArea").textContent = "まだ変換結果がありません。";
+  $("codeArea").classList.remove("hidden");
+  $("infoArea").classList.add("hidden");
 
-      setTimeout(() => {
-        try {
-          ImageTracer.imageToSVG(
-            currentImageDataUrl,
-            function(svgStr) {
-              if (!svgStr) throw new Error('変換結果が空です');
-              currentSvgString = svgStr;
-              svgContainer.innerHTML = svgStr;
-              svgCodeTextarea.value = svgStr;
+  $("previewTitle").textContent = "プレビュー";
+  $("previewFormat").textContent = "NO IMAGE";
+  $("imageDimensions").textContent = "画像未選択";
+  $("outputInfo").textContent = "出力待機中";
 
-              codeSection.style.display = 'block';
-              convertBtn.disabled = false;
-              convertBtn.textContent = 'SVGへ再変換する';
-            },
-            options
-          );
-        } catch (err) {
-          alert('エラー: ' + err.message);
-          convertBtn.disabled = false;
-          convertBtn.textContent = 'SVGへ変換する';
+  setProgress(0);
+  renderFileList();
+  showEmptyPreview("画像を追加すると、ここにプレビューが表示されます。");
+  updateFileCount();
+  updateButtons();
+  toast("すべてリセットしました。");
+}
+
+/* ---------- Preview ---------- */
+
+function renderPreview() {
+  const entry = getActiveFile();
+
+  if (!entry) {
+    showEmptyPreview("画像を追加すると、ここにプレビューが表示されます。");
+    $("previewTitle").textContent = "プレビュー";
+    $("previewFormat").textContent = "NO IMAGE";
+    $("imageDimensions").textContent = "画像未選択";
+    $("outputInfo").textContent = "出力待機中";
+    $("codeArea").value = "";
+    return;
+  }
+
+  $("imageDimensions").textContent = `${entry.width} × ${entry.height}`;
+  $("previewTitle").textContent = entry.name;
+
+  if (state.previewMode === "output") {
+    const result = state.results.get(entry.id);
+
+    if (result) {
+      $("previewFormat").textContent = "SVG OUTPUT";
+      setPreviewImage(result.blob, entry.name + " SVG");
+      $("outputInfo").textContent = formatBytes(result.blob.size);
+      $("codeArea").value = result.svg;
+      return;
+    }
+  }
+
+  $("previewFormat").textContent = entry.file.type || "IMAGE";
+  $("outputInfo").textContent = state.results.has(entry.id)
+    ? "変換済み"
+    : "出力待機中";
+
+  const img = document.createElement("img");
+  img.alt = entry.name;
+  img.src = entry.url;
+  $("previewStage").replaceChildren(img);
+
+  const result = state.results.get(entry.id);
+  $("codeArea").value = result ? result.svg : "";
+}
+
+function setPreviewMode(mode) {
+  state.previewMode = mode;
+  $("originalTab").classList.toggle("active", mode === "original");
+  $("outputTab").classList.toggle("active", mode === "output");
+  renderPreview();
+}
+
+/* ---------- Image preparation ---------- */
+
+function getProcessingDimensions(entry) {
+  const requestedScale = Number($("scale").value) / 100;
+  const maxSize = Number($("maxSize").value);
+
+  let scale = Math.min(
+    requestedScale,
+    maxSize / Math.max(entry.width, entry.height),
+    Math.sqrt(CONFIG.maxProcessPixels / (entry.width * entry.height))
+  );
+
+  scale = Math.min(1, scale);
+
+  const width = Math.max(1, Math.round(entry.width * scale));
+  const height = Math.max(1, Math.round(entry.height * scale));
+
+  return { width, height };
+}
+
+function createImageDataForWorker(entry) {
+  const { width, height } = getProcessingDimensions(entry);
+  const canvas = document.createElement("canvas");
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d", {
+    alpha: true,
+    willReadFrequently: true
+  });
+
+  if (!ctx) throw new Error("Canvasを初期化できません。");
+
+  ctx.clearRect(0, 0, width, height);
+  ctx.imageSmoothingEnabled = $("smooth").checked;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(entry.image, 0, 0, width, height);
+
+  if ($("whiteBg").checked) {
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const alpha = data[i + 3] / 255;
+      data[i] = Math.round(data[i] * alpha + 255 * (1 - alpha));
+      data[i + 1] = Math.round(data[i + 1] * alpha + 255 * (1 - alpha));
+      data[i + 2] = Math.round(data[i + 2] * alpha + 255 * (1 - alpha));
+      data[i + 3] = 255;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  } else {
+    const threshold = Number($("threshold").value);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] <= threshold) data[i] = 0;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  }
+
+  const imageData = ctx.getImageData(0, 0, width, height);
+
+  let embeddedData = null;
+  if ($("mode").value === "embed") {
+    embeddedData = canvas.toDataURL("image/png");
+  }
+
+  canvas.width = 1;
+  canvas.height = 1;
+
+  return {
+    width,
+    height,
+    data: imageData.data,
+    embeddedData
+  };
+}
+
+/* ---------- Worker ---------- */
+
+function createTracerWorker() {
+  const source = `
+    "use strict";
+
+    self.onmessage = function(event) {
+      const message = event.data;
+
+      if (!message || message.type !== "trace") return;
+
+      try {
+        importScripts(${JSON.stringify(CONFIG.tracerURL)});
+
+        if (!self.ImageTracer ||
+            typeof self.ImageTracer.imagedataToSVG !== "function") {
+          throw new Error("ImageTracerJSを読み込めませんでした。");
         }
-      }, 50);
-    });
 
-    copyBtn.addEventListener('click', () => {
-      if (!currentSvgString) return;
-      navigator.clipboard.writeText(currentSvgString).then(() => {
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = 'コピーしました！';
-        setTimeout(() => copyBtn.textContent = originalText, 2000);
+        const pixels = new Uint8ClampedArray(message.buffer);
+
+        const imageData = {
+          width: message.width,
+          height: message.height,
+          data: pixels
+        };
+
+        const svg = self.ImageTracer.imagedataToSVG(
+          imageData,
+          message.options
+        );
+
+        if (typeof svg !== "string" || !svg.includes("<svg")) {
+          throw new Error("SVGの生成に失敗しました。");
+        }
+
+        self.postMessage({
+          type: "success",
+          svg: svg
+        });
+
+      } catch (error) {
+        self.postMessage({
+          type: "error",
+          message: error && error.message
+            ? error.message
+            : "不明な変換エラー"
+        });
+      }
+    };
+  `;
+
+  const blob = new Blob([source], { type:"text/javascript" });
+  const url = URL.createObjectURL(blob);
+
+  try {
+    return {
+      worker: new Worker(url),
+      url
+    };
+  } catch (error) {
+    URL.revokeObjectURL(url);
+    throw new Error("Web Workerを起動できません。このブラウザでの実行を確認してください。");
+  }
+}
+
+function traceWithWorker(imageData, width, height) {
+  return new Promise((resolve, reject) => {
+    let workerObject;
+
+    try {
+      workerObject = createTracerWorker();
+    } catch (error) {
+      reject(error);
+      return;
+    }
+
+    const worker = workerObject.worker;
+    const workerURL = workerObject.url;
+
+    state.worker = worker;
+
+    let settled = false;
+
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+
+      worker.terminate();
+      URL.revokeObjectURL(workerURL);
+
+      if (state.worker === worker) state.worker = null;
+
+      callback(value);
+    };
+
+    const timeout = setTimeout(() => {
+      finish(reject, new Error("変換がタイムアウトしました。画像サイズや色数を下げて再試行してください。"));
+    }, CONFIG.workerTimeout);
+
+    worker.onmessage = event => {
+      const data = event.data || {};
+
+      if (data.type === "success") {
+        finish(resolve, data.svg);
+      } else {
+        finish(reject, new Error(data.message || "変換に失敗しました。"));
+      }
+    };
+
+    worker.onerror = event => {
+      event.preventDefault();
+      finish(reject, new Error("Workerでエラーが発生しました。外部ライブラリの読み込みやブラウザ設定を確認してください。"));
+    };
+
+    const options = {
+      numberofcolors: Number($("colors").value),
+      colorquantcycles: 3,
+      colorsampling: 2,
+      pathomit: Math.max(0, Math.round(Number($("simplify").value) * 2)),
+      ltres: Math.max(0.1, Number($("simplify").value) * 0.35),
+      qtres: Math.max(0.1, Number($("simplify").value) * 0.35),
+      rightangleenhance: true,
+      linefilter: true,
+      scale: 1,
+      strokewidth: 0,
+      viewbox: true,
+      roundcoords: 2,
+      desc: false,
+      blurradius: $("smooth").checked ? 1 : 0,
+      blurdelta: 20
+    };
+
+    try {
+      worker.postMessage({
+        type: "trace",
+        width,
+        height,
+        buffer: imageData.buffer,
+        options
+      }, [imageData.buffer]);
+    } catch (error) {
+      finish(reject, new Error("変換データをWorkerに送信できませんでした: " + error.message));
+    }
+  });
+}
+
+/* ---------- SVG ---------- */
+
+function createEmbeddedSVG(width, height, dataURL) {
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<image width="${width}" height="${height}" href="${dataURL}" xlink:href="${dataURL}"/>`,
+    "</svg>"
+  ].join("\n");
+}
+
+function svgBlob(svg) {
+  return new Blob([svg], { type:"image/svg+xml;charset=utf-8" });
+}
+
+/* ---------- Conversion ---------- */
+
+async function convertOne(entry) {
+  const prepared = createImageDataForWorker(entry);
+
+  let svg;
+
+  if ($("mode").value === "embed") {
+    svg = createEmbeddedSVG(
+      prepared.width,
+      prepared.height,
+      prepared.embeddedData
+    );
+  } else {
+    svg = await traceWithWorker(
+      prepared.data,
+      prepared.width,
+      prepared.height
+    );
+  }
+
+  if (!svg || svg.length < 20) {
+    throw new Error("SVGデータが空、または不正です。");
+  }
+
+  const blob = svgBlob(svg);
+
+  return {
+    svg,
+    blob,
+    width:prepared.width,
+    height:prepared.height,
+    size:blob.size,
+    createdAt:Date.now()
+  };
+}
+
+async function startConversion() {
+  if (state.busy) {
+    cancelConversion(true);
+    return;
+  }
+
+  if (!state.files.length) {
+    toast("先に画像を追加してください。");
+    return;
+  }
+
+  state.cancelRequested = false;
+  const currentRun = ++state.runId;
+  const targets = [...state.files];
+
+  setBusy(true);
+  setProgress(0);
+  $("outputInfo").textContent = "変換を準備しています...";
+
+  let completed = 0;
+  let failed = 0;
+  const errors = [];
+
+  try {
+    for (let index = 0; index < targets.length; index++) {
+      if (state.cancelRequested || currentRun !== state.runId) break;
+
+      const entry = targets[index];
+
+      $("outputInfo").textContent =
+        `変換中 ${index + 1} / ${targets.length}: ${entry.name}`;
+
+      try {
+        const result = await convertOne(entry);
+
+        if (state.cancelRequested || currentRun !== state.runId) break;
+
+        state.results.set(entry.id, result);
+        completed++;
+
+      } catch (error) {
+        console.error(error);
+        failed++;
+        errors.push(`${entry.name}: ${error.message}`);
+      }
+
+      setProgress(((index + 1) / targets.length) * 100);
+    }
+
+    if (state.cancelRequested || currentRun !== state.runId) {
+      toast("変換をキャンセルしました。");
+      $("outputInfo").textContent = "キャンセルされました";
+    } else {
+      if (completed > 0) {
+        state.activeId = targets.find(item => state.results.has(item.id))?.id
+          ?? state.activeId;
+
+        setPreviewMode("output");
+        toast(`${completed}個の画像を変換しました。`);
+      }
+
+      if (failed > 0) {
+        console.warn(errors);
+        toast(`${failed}個の画像でエラーが発生しました。`);
+        $("outputInfo").textContent = `${completed}成功 / ${failed}失敗`;
+      } else {
+        $("outputInfo").textContent = `${completed}個の変換が完了`;
+      }
+    }
+
+  } finally {
+    if (currentRun === state.runId) {
+      setBusy(false);
+      renderFileList();
+      renderPreview();
+      updateButtons();
+    }
+  }
+}
+
+function cancelConversion(showMessage) {
+  if (!state.busy && !state.worker) return;
+
+  state.cancelRequested = true;
+  state.runId++;
+
+  if (state.worker) {
+    state.worker.terminate();
+    state.worker = null;
+  }
+
+  setBusy(false);
+
+  if (showMessage) toast("キャンセルしました。");
+}
+
+/* ---------- Downloads ---------- */
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.style.display = "none";
+
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function saveActive() {
+  const entry = getActiveFile();
+  const result = getActiveResult();
+
+  if (!entry || !result) return;
+
+  downloadBlob(result.blob, safeName(entry.name) + ".svg");
+}
+
+async function copyActive() {
+  const result = getActiveResult();
+  if (!result) return;
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(result.svg);
+    } else {
+      const area = $("codeArea");
+      area.value = result.svg;
+      area.focus();
+      area.select();
+
+      const copied = document.execCommand("copy");
+      if (!copied) throw new Error("コピーに失敗しました。");
+    }
+
+    toast("SVGコードをコピーしました。");
+  } catch (error) {
+    console.error(error);
+    toast("コピーできませんでした。コード欄から手動でコピーしてください。");
+  }
+}
+
+/* ---------- ZIP writer (STORE) ---------- */
+
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    table[n] = c >>> 0;
+  }
+
+  return table;
+})();
+
+function crc32(bytes) {
+  let crc = 0xFFFFFFFF;
+
+  for (let i = 0; i < bytes.length; i++) {
+    crc = CRC_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+  }
+
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+function write16(view, offset, value) {
+  view.setUint16(offset, value, true);
+}
+
+function write32(view, offset, value) {
+  view.setUint32(offset, value >>> 0, true);
+}
+
+function createZip(files) {
+  const encoder = new TextEncoder();
+  const localParts = [];
+  const centralParts = [];
+
+  let offset = 0;
+
+  const now = new Date();
+  const dosTime =
+    (now.getHours() << 11) |
+    (now.getMinutes() << 5) |
+    Math.floor(now.getSeconds() / 2);
+
+  const dosDate =
+    ((Math.max(1980, now.getFullYear()) - 1980) << 9) |
+    ((now.getMonth() + 1) << 5) |
+    now.getDate();
+
+  for (const file of files) {
+    const nameBytes = encoder.encode(file.name);
+    const data = new Uint8Array(file.blob.size);
+
+    // Blobの配列化は呼び出し元で行う
+    if (file.bytes) data.set(file.bytes);
+
+    const crc = crc32(data);
+    const size = data.length;
+
+    const local = new Uint8Array(30 + nameBytes.length);
+    const lv = new DataView(local.buffer);
+
+    write32(lv, 0, 0x04034b50);
+    write16(lv, 4, 20);
+    write16(lv, 6, 0x0800);
+    write16(lv, 8, 0);
+    write16(lv, 10, dosTime);
+    write16(lv, 12, dosDate);
+    write32(lv, 14, crc);
+    write32(lv, 18, size);
+    write32(lv, 22, size);
+    write16(lv, 26, nameBytes.length);
+    write16(lv, 28, 0);
+    local.set(nameBytes, 30);
+
+    const central = new Uint8Array(46 + nameBytes.length);
+    const cv = new DataView(central.buffer);
+
+    write32(cv, 0, 0x02014b50);
+    write16(cv, 4, 20);
+    write16(cv, 6, 20);
+    write16(cv, 8, 0x0800);
+    write16(cv, 10, 0);
+    write16(cv, 12, dosTime);
+    write16(cv, 14, dosDate);
+    write32(cv, 16, crc);
+    write32(cv, 20, size);
+    write32(cv, 24, size);
+    write16(cv, 28, nameBytes.length);
+    write16(cv, 30, 0);
+    write16(cv, 32, 0);
+    write16(cv, 34, 0);
+    write16(cv, 36, 0);
+    write32(cv, 38, 0);
+    write32(cv, 42, offset);
+    central.set(nameBytes, 46);
+
+    localParts.push(local, data);
+    centralParts.push(central);
+
+    offset += local.length + data.length;
+  }
+
+  const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+
+  const end = new Uint8Array(22);
+  const ev = new DataView(end.buffer);
+
+  write32(ev, 0, 0x06054b50);
+  write16(ev, 4, 0);
+  write16(ev, 6, 0);
+  write16(ev, 8, files.length);
+  write16(ev, 10, files.length);
+  write32(ev, 12, centralSize);
+  write32(ev, 16, offset);
+  write16(ev, 20, 0);
+
+  return new Blob(
+    [...localParts, ...centralParts, end],
+    { type:"application/zip" }
+  );
+}
+
+async function saveZip() {
+  const entries = state.files
+    .map(entry => ({
+      entry,
+      result:state.results.get(entry.id)
+    }))
+    .filter(item => item.result);
+
+  if (!entries.length) {
+    toast("ZIPに含める変換結果がありません。");
+    return;
+  }
+
+  if (entries.length > 65535) {
+    toast("ZIPのファイル数上限を超えています。");
+    return;
+  }
+
+  try {
+    $("zipBtn").disabled = true;
+    $("zipBtn").textContent = "作成中...";
+
+    const zipFiles = [];
+
+    for (const item of entries) {
+      const bytes = new Uint8Array(await item.result.blob.arrayBuffer());
+
+      zipFiles.push({
+        name:safeName(item.entry.name) + ".svg",
+        blob:item.result.blob,
+        bytes
       });
-    });
+    }
 
-    downloadBtn.addEventListener('click', () => {
-      if (!currentSvgString) return;
-      const blob = new Blob([currentSvgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'converted.svg';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  </script>
-</body>
-</html>c = currentImageDataUrl;
-            previewSection.style.display = 'grid';
-            svgContainer.innerHTML = '変換待ち...';
-            codeSection.style.display = 'none';
-            convertBtn.disabled = false;
-          } catch (err) {
-            alert('画像の処理中にエラーが発生しました（セキュリティ制限の可能性があります）: ' + err.message);
-          }
-        };
-        img.onerror = () => {
-          alert('画像として認識できませんでした。別の画像を試してください。');
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+    const zip = createZip(zipFiles);
+    downloadBlob(zip, "VECTOR-FORGE-EXPORT.zip");
+    toast(`${zipFiles.length}個のSVGをZIPにまとめました。`);
 
-    // 変換処理（例外処理を追加）
-    convertBtn.addEventListener('click', () => {
-      if (!currentImageDataUrl) {
-        alert('先に画像を選択してください。');
-        return;
-      }
+  } catch (error) {
+    console.error(error);
+    toast("ZIPの作成に失敗しました: " + error.message);
 
-      if (typeof ImageTracer === 'undefined') {
-        alert('ImageTracer が読み込まれていません。');
-        return;
-      }
+  } finally {
+    $("zipBtn").textContent = "ZIP保存";
+    updateButtons();
+  }
+}
 
-      convertBtn.disabled = true;
-      convertBtn.textContent = '変換中...';
-      svgContainer.innerHTML = 'ベクター化を計算中...';
+/* ---------- Info panel ---------- */
 
-      const options = {
-        numberofcolors: parseInt(colorsRange.value, 10),
-        pathomit: parseInt(omitRange.value, 10),
-        strokewidth: 1,
-        ltres: 1,
-        qtres: 1
-      };
+function showCodeTab() {
+  $("codeTab").classList.add("active");
+  $("infoTab").classList.remove("active");
+  $("codeArea").classList.remove("hidden");
+  $("infoArea").classList.add("hidden");
+}
 
-      if (presetSelect.value === 'bw') {
-        options.numberofcolors = 2;
-        options.colorquantcycles = 1;
-      } else if (presetSelect.value === 'detailed') {
-        options.ltres = 0.5;
-        options.qtres = 0.5;
-      }
+function showInfoTab() {
+  $("infoTab").classList.add("active");
+  $("codeTab").classList.remove("active");
+  $("codeArea").classList.add("hidden");
+  $("infoArea").classList.remove("hidden");
 
-      // 非同期で安全に実行
-      setTimeout(() => {
-        try {
-          ImageTracer.imageToSVG(
-            currentImageDataUrl,
-            function(svgStr) {
-              if (!svgStr) {
-                throw new Error('SVGデータの生成に失敗しました。');
-              }
-              currentSvgString = svgStr;
-              svgContainer.innerHTML = svgStr;
-              svgCodeTextarea.value = svgStr;
+  const entry = getActiveFile();
+  const result = getActiveResult();
 
-              codeSection.style.display = 'block';
-              convertBtn.disabled = false;
-              convertBtn.textContent = 'SVGへ再変換する';
-            },
-            options
-          );
-        } catch (err) {
-          alert('変換中にエラーが発生しました: ' + err.message);
-          convertBtn.disabled = false;
-          convertBtn.textContent = 'SVGへ変換する';
-          svgContainer.innerHTML = 'エラーが発生しました';
-        }
-      }, 50);
-    });
+  if (!entry || !result) {
+    $("infoArea").textContent = "まだ変換結果がありません。";
+    return;
+  }
 
-    // コピー
-    copyBtn.addEventListener('click', () => {
-      if (!currentSvgString) return;
-      navigator.clipboard.writeText(currentSvgString).then(() => {
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = 'コピーしました！';
-        setTimeout(() => copyBtn.textContent = originalText, 2000);
-      }).catch(err => alert('コピー失敗: ' + err));
-    });
+  $("infoArea").textContent =
+    `ファイル名: ${entry.name}\n` +
+    `元画像: ${entry.width} × ${entry.height}\n` +
+    `出力画像: ${result.width} × ${result.height}\n` +
+    `SVGサイズ: ${formatBytes(result.size)}\n` +
+    `変換方式: ${$("mode").value === "vector" ? "ベクター化" : "画像埋め込み"}\n` +
+    `変換日時: ${new Date(result.createdAt).toLocaleString()}`;
+}
 
-    // ダウンロード
-    downloadBtn.addEventListener('click', () => {
-      if (!currentSvgString) return;
-      const blob = new Blob([currentSvgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'converted.svg';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  </script>
+/* ---------- Event handlers ---------- */
+
+$("dropzone").addEventListener("click", () => {
+  if (state.busy) {
+    toast("変換中はファイルを追加できません。");
+    return;
+  }
+
+  $("fileInput").click();
+});
+
+$("dropzone").addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    $("fileInput").click();
+  }
+});
+
+$("fileInput").addEventListener("change", async event => {
+  const files = event.target.files;
+  await addFiles(files);
+
+  // 同じファイルをもう一度選べるようにする
+  event.target.value = "";
+});
+
+const dropzone = $("dropzone");
+
+["dragenter","dragover"].forEach(type => {
+  dropzone.addEventListener(type, event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!state.busy) dropzone.classList.add("dragover");
+  });
+});
+
+["dragleave","dragend"].forEach(type => {
+  dropzone.addEventListener(type, event => {
+    event.preventDefault();
+    dropzone.classList.remove("dragover");
+  });
+});
+
+dropzone.addEventListener("drop", event => {
+  event.preventDefault();
+  event.stopPropagation();
+  dropzone.classList.remove("dragover");
+
+  if (state.busy) {
+    toast("変換中はファイルを追加できません。");
+    return;
+  }
+
+  addFiles(event.dataTransfer.files);
+});
+
+document.addEventListener("dragover", event => event.preventDefault());
+document.addEventListener("drop", event => {
+  if (!dropzone.contains(event.target)) event.preventDefault();
+});
+
+$("convertBtn").addEventListener("click", startConversion);
+$("clearAll").addEventListener("click", clearAll);
+
+$("saveBtn").addEventListener("click", saveActive);
+$("quickSave").addEventListener("click", saveActive);
+$("copyBtn").addEventListener("click", copyActive);
+$("zipBtn").addEventListener("click", saveZip);
+
+$("originalTab").addEventListener("click", () => setPreviewMode("original"));
+$("outputTab").addEventListener("click", () => setPreviewMode("output"));
+
+$("fitBtn").addEventListener("click", () => {
+  renderPreview();
+  toast("プレビューを更新しました。");
+});
+
+$("codeTab").addEventListener("click", showCodeTab);
+$("infoTab").addEventListener("click", showInfoTab);
+
+/* ---------- Initialization ---------- */
+
+function initialize() {
+  updateSettingsLabels();
+  updateFileCount();
+  updateButtons();
+  setProgress(0);
+
+  if (!("Worker" in window)) {
+    toast("このブラウザはWeb Workerに対応していません。");
+  }
+}
+
+window.addEventListener("beforeunload", () => {
+  if (state.worker) state.worker.terminate();
+
+  for (const entry of state.files) {
+    URL.revokeObjectURL(entry.url);
+  }
+
+  revokePreviewURL();
+});
+
+initialize();
+
+</script>
 </body>
 </html>
